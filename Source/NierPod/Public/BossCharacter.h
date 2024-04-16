@@ -48,13 +48,13 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
 
-	float attackDistance = 300.0f;
+	float attackDistance = 100.0f;
 
 
 	float rotSpeed = 5.0f;
 
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
-	float attackDelayTime = 3.0f;
+	float attackDelayTime = 2.0f;
 
 	UFUNCTION(BlueprintCallable)
 	void BoxCollisionExtending();
@@ -88,8 +88,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
 	class UWidgetComponent* bosswidgetComp;
 
-	double GetMaxHealth();
-	double GetHealth();
 private:
 
 	class UBossHealthWidget* bossUI;
@@ -99,6 +97,7 @@ private:
 
 	int32 currentHP = 0;
 	FVector hitLocation;
+	bool bIsAttacked = false;
 
 
 	void Idle(float DeltaSeconds);

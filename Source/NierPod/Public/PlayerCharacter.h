@@ -37,8 +37,6 @@ public:
 	UFUNCTION()
 	void PlayerDamaged();
 
-	float GetCurrentHealth();
-	float GetMaxHealth();
 
 	UPROPERTY(EditAnywhere, Category = "PlayerSettings")
 	class UWidgetComponent* playerwidgetComp;

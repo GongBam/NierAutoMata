@@ -362,17 +362,6 @@ void APlayerCharacter::PlayerDamaged()
 
 }
 
-float APlayerCharacter::GetCurrentHealth()
-{
-    return float(currentHP);
-}
-
-float APlayerCharacter::GetMaxHealth()
-{
-    return float(maxHP);
-}
-
-
 
 void APlayerCharacter::LeftAttack(const FInputActionValue& InputValue)
 {

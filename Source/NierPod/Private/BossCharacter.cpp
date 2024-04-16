@@ -15,18 +15,21 @@ ABossCharacter::ABossCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	//왼발 공격 콜리전
 	leftFootCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("LeftFoot Attack Collision"));
 	leftFootCollision -> SetupAttachment(GetMesh(), TEXT("LeftToeBaseSocket"));
 	leftFootCollision -> SetRelativeLocation(FVector(0, 10, 0));
 	leftFootCollision -> SetRelativeScale3D(FVector(0.2f, 0.2f, 0.2f));
-
+	//오른발 공격 콜리전
 	rightFootCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("RightFoot Attack Collision"));
 	rightFootCollision -> SetupAttachment(GetMesh(), TEXT("RightFootToeBaseSocket"));
 	rightFootCollision -> SetRelativeLocation(FVector(-10, -20, 0));
 	rightFootCollision -> SetRelativeScale3D(FVector(0.2f,0.2f,0.2f));
 
+	//체력바위젯
 	bosswidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("Boss Health Widget Component"));
 
+	//공격 콜리전 데미지오버랩 바인딩 
 	leftFootCollision -> OnComponentBeginOverlap.AddDynamic(this, &ABossCharacter::OnDealDamageOverlapBegin);
 	rightFootCollision -> OnComponentBeginOverlap.AddDynamic(this, &ABossCharacter::OnDealDamageOverlapBegin);
 
@@ -34,6 +37,7 @@ ABossCharacter::ABossCharacter()
 	//기본 캡슐컴포넌트 preset 설정
 	GetCapsuleComponent()->SetCollisionProfileName(FName("BossPreset"));
 
+	//왼발, 오른발 공격 콜리전 양 발 소켓에 넣음 
 	leftFootCollision->SetCollisionProfileName(FName("BossAttackPreset"));
 	rightFootCollision->SetCollisionProfileName(FName("BossAttackPreset"));
 
@@ -45,21 +49,24 @@ void ABossCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//기본상태 IDLE 상태로 초기화
-	bossState = EBossState::IDLE;
-
 	//월드에 있는 플레이어 찾고 target 에 넣어둠 
 	for (TActorIterator<APlayerCharacter> player(GetWorld()); player; ++player)
 	{
 		target = *player;
 	}
+
+	//기본상태 IDLE 상태로 초기화
+	bossState = EBossState::IDLE;
 	
 	//현재 체력 max 로 초기화
 	currentHP = maxHP;
 
+	//공격받았는지 상태 false 초기화
+	bIsAttacked = false;
+
+	//체력바 UI 위젯 받아오고 뷰포트에 붙임
 	bossUI = Cast<UBossHealthWidget>(bosswidgetComp->GetWidget());
 
-	//체력바 UI 위젯 
 	if (bossHealthWidget_bp != nullptr)
 	{
 		bossUI = CreateWidget<UBossHealthWidget>(GetWorld(), bossHealthWidget_bp);
@@ -109,7 +116,6 @@ void ABossCharacter::Tick(float DeltaTime)
 	case EBossState::DIE:
 		break;
 	default:
-
 		break;
 	}
 }
@@ -117,22 +123,11 @@ void ABossCharacter::Tick(float DeltaTime)
 void ABossCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-}
-
-double ABossCharacter::GetMaxHealth()
-{
-	return double(maxHP);
-}
-
-double ABossCharacter::GetHealth()
-{
-	return double(currentHP);
 }
 
 void ABossCharacter::Idle(float DeltaSeconds)
 {	
-	//보스 피가 900 이하라면 MOVE 상태로 전환
+	//보스 피가 900 이하라면 MOVE 상태로 전환 - 페이즈 시작
 	if (currentHP <= 900.0f)
 	{
 		bossState = EBossState::MOVE;
@@ -141,10 +136,13 @@ void ABossCharacter::Idle(float DeltaSeconds)
 
 void ABossCharacter::AttackReady()
 {
+	if (bossState == EBossState::BLOCK) { return; }
+
 	UE_LOG(LogTemp, Warning, TEXT("READY TO ATTACK PLAYER"));
 	//플레이어 거리가 attackDistance 보다 작으면
 	if (FVector::Distance(GetActorLocation(), target->GetActorLocation()) < attackDistance)
-		{	int32 num = FMath::RandRange(1,3);
+		{	//랜덤 발차기 - 기본공격 
+			int32 num = FMath::RandRange(1,2);
 			if(num == 1)
 			{
 				bossState = EBossState::ATTACK;
@@ -158,6 +156,7 @@ void ABossCharacter::AttackReady()
 				bossState = EBossState::JUMPATTACK;
 			}
 	}
+	//플레이어 거리가 attackDistance 보다 멀리 있으면 다시 쫓아감
 	else
 	{
 		bossState = EBossState::MOVE;
@@ -165,7 +164,9 @@ void ABossCharacter::AttackReady()
 }
 
 void ABossCharacter::Attack()
-{	
+{
+	if (bossState == EBossState::BLOCK) {return;}
+
 	//플레이어 거리가 attackDistance 보다 작으면
 	if (FVector::Distance(GetActorLocation(), target->GetActorLocation()) < attackDistance + 10.0f)
 	{	
@@ -182,6 +183,8 @@ void ABossCharacter::Attack()
 
 void ABossCharacter::Attack2()
 {
+	if (bossState == EBossState::BLOCK) {return;}
+
 	//플레이어 거리가 attackDistance 보다 작으면
 	if (FVector::Distance(GetActorLocation(), target->GetActorLocation()) < attackDistance + 10.0f)
 	{
@@ -197,6 +200,8 @@ void ABossCharacter::Attack2()
 
 void ABossCharacter::JumpAttack()
 {
+	if (bossState == EBossState::BLOCK) { return; }
+
 	//플레이어 거리가 attackDistance 보다 작으면
 	if (FVector::Distance(GetActorLocation(), target->GetActorLocation()) < attackDistance + 10.0f)
 	{
@@ -209,7 +214,7 @@ void ABossCharacter::JumpAttack()
 		bossState = EBossState::MOVE;
 	}
 }
-
+//플레이어 쫓아가는 함수
 void ABossCharacter::MoveToTarget(float deltaSeconds)
 {	
 	//플레이어 방향백터
@@ -224,109 +229,90 @@ void ABossCharacter::MoveToTarget(float deltaSeconds)
 		AddMovementInput(targetDir.GetSafeNormal());
 
 		//이동 방향으로 회전
-
 		FRotator currentRot = GetActorRotation();
 		FRotator targetRot = targetDir.ToOrientationRotator();
-
 		FRotator calcRot = FMath::Lerp(currentRot, targetRot, deltaSeconds * rotSpeed);
-
 		SetActorRotation(calcRot);
+
+
+		FTimerHandle blockTimer;
+		GetWorldTimerManager().SetTimer(blockTimer, FTimerDelegate::CreateLambda([&]()
+			{
+				bossState = EBossState::BLOCK;
+			}), 5.0f, false);
 	}
-	// 플레이어가 공격범위 안에 있다면 
-	else
+	// 플레이어가 공격범위 안에 있다면 + 공격당하지 않았다면 
+	if (targetDir.Length() <= attackDistance && bIsAttacked == false)
 	{	// 어택준비로 전환
 		bossState = EBossState::ATTACKREADY;
 	}
 }
-
+//ATTACK 후 잠시 Delay
 void ABossCharacter::AttackDelay(float deltaSeconds)
-{
-
+{	
 	currentTime += deltaSeconds;
-	if (currentTime > attackDelayTime)
-	{
+	if (currentTime > attackDelayTime && bIsAttacked == false)
+	{	
+		//다음 공격 준비 
 		currentTime = 0;
 		bossState = EBossState::ATTACKREADY;
-	}
-	
-	if(FVector::Distance(GetActorLocation(), target->GetActorLocation()) > attackDistance + 10.f)
-	{	
-		if(currentTime > attackDelayTime)
-			{ 
-				bossState = EBossState::MOVE;
+		//플레이어가 반경 벗어나면 다시 쫓아감 
+		if(FVector::Distance(GetActorLocation(), target->GetActorLocation()) > attackDistance + 10.f)
+		{	
+			if(currentTime > attackDelayTime)
+			{	
+			currentTime = 0;
+			bossState = EBossState::MOVE;
 			}
+		}
 	}
 }
 
 void ABossCharacter::Blocking(float deltaSeconds)
 {	//보스 피가 800 이하로 깎였을 때 부터 방어 시작
-
 		//제자리에서 쉴드 생성
 		GetWorld()->SpawnActor<AShield>(shield, GetActorLocation(), GetActorRotation());
 		SetActorLocation(GetActorLocation());
-		//2 초 지났을 때 확률적으로(Shield : 1.5초 뒤 저절로 사라짐)
-		currentTime += deltaSeconds;
-		if(currentTime > 2.0f)
-		{	
-			currentTime = 0;
-			if(shield != nullptr)
-			{ 
-				int32 num = FMath::RandRange(1,2);
-				if (num == 1)
-				{		//MOVE 상태로 전환
-					bossState = EBossState::MOVE;
-				}
-				if (num == 2)
-				{ 
-					bossState = EBossState::BLOCKATTACK;
-				}
-			}
-		}
+		//2 초 지났을 때 (Shield : 1.5초 뒤 저절로 사라짐)
+		FTimerHandle blockingTimer;
+		GetWorldTimerManager().SetTimer(blockingTimer, FTimerDelegate::CreateLambda([&]()
+			{
+				bossState = EBossState::BLOCKATTACK;
+			}), 1.0f, false);
+		
 }
 
 void ABossCharacter::BlocKAttack()
-{	
+{
 	//쉴드공격 후 MOVE 전환
 	UE_LOG(LogTemp, Warning, TEXT("SHIELD ATTACK"));
-	bossState = EBossState::MOVE;
+	bossState = EBossState::ATTACKDELAY;
 }
 
 void ABossCharacter::DamageProcess(float deltaSeconds)
 {
-	FVector targetLoc = hitLocation + GetActorLocation() * -1.0f;
-	FVector knockBackLocation = FMath::Lerp(GetActorLocation(), targetLoc, deltaSeconds * 1.5f);
-	//보스 체력이 800 이하가 아니라면 
+	bIsAttacked = false;
+
+	//보스 체력이 900 이하가 아니라면 
 	if(currentHP > 900)
 	{	
-		//보스 뒤로 아주쪼금 밀려남 
-		SetActorLocation(knockBackLocation, true);
-		UE_LOG(LogTemp, Warning, TEXT("%d"), currentHP);
-		bossState = EBossState::IDLE;
-	}
-	//보스 체력이 800 이하라면 
-	else
-	{ 
-			//확률적으로
-			int32 num = FMath::RandRange(0,5);
-			if(num > 0)
-			{ 
-				//맞거나
-				if (FVector::Distance(GetActorLocation(), targetLoc) > 10)
-				{	
-					//보스 뒤로 아주쪼금 밀려남 
-					SetActorLocation(knockBackLocation, true);
-					UE_LOG(LogTemp, Warning, TEXT("%d"), currentHP);
-				}
-				else
-				{
-					bossState = EBossState::MOVE;
-				}
-			}
-			//방어
-			else
+		//피격모션 후 IDLE 
+		FTimerHandle hitTimer;
+		GetWorldTimerManager().SetTimer(hitTimer, FTimerDelegate::CreateLambda([&]()
 			{
-				bossState = EBossState::BLOCK;
-			}
+				bossState = EBossState::IDLE;
+			}), 1.0f, false);
+
+	}
+	//보스 체력이 900 이하라면 
+	if(currentHP <= 900)
+	{ 	
+		//피격모션 후 플레이어 쫓아감 
+		FTimerHandle hitTimer;
+		GetWorldTimerManager().SetTimer(hitTimer, FTimerDelegate::CreateLambda([&]() 
+		{
+		bossState = EBossState::MOVE;
+		}), 1.0f, false);
 	}	
 }
 
@@ -342,34 +328,37 @@ void ABossCharacter::BoxCollisionReset()
 	leftFootCollision->SetRelativeScale3D(FVector(0.2f));
 }
 
+//보스 데미지받는 함수
 void ABossCharacter::OnDamaged(int32 dmg)
-{
-	if (bossState == EBossState::BLOCK)
-	{
-		return;
-	}
-	if (bossState == EBossState::DAMAGED)
-	{
-		return;
-	}
+{	
+	//보스가 공격중 / 피격받은 직후 / 방어중 일 땐 데미지 적용 X 
+	if (bossState == EBossState::ATTACK){return;}
+	if (bossState == EBossState::ATTACK2){return;}
+	if (bossState == EBossState::JUMPATTACK){return;}
+	if (bossState == EBossState::BLOCK){return;}
+	if (bossState == EBossState::BLOCKATTACK){return;}
+	if (bossState == EBossState::DAMAGED){return;}
+
+	//공격 받음 true 체크 
+	bIsAttacked = true;
+
 	//HP값이 0 ~ maxHP 값 사이에만 있을 수 있게 설정
 	currentHP = FMath::Clamp(currentHP - dmg, 0, maxHP);
 	if (bossUI != nullptr)
-	{
+	{	//체력UI 깎임 
 		bossUI->SetHealthBar((float)currentHP / (float)maxHP);
 	}
 
 	// 데미지 계산 결과, 현재 체력이 0 보다 크면
 	if (currentHP > 0)
-	{
+	{	
 		//DamageProcess 로 전환
 		bossState = EBossState::DAMAGED;
 		hitLocation = GetActorLocation();
-		UE_LOG(LogTemp, Warning, TEXT("%d"), currentHP);
 	}
 	// 데미지 계산 결과, 현재 체력이 0 이하라면 
 	if (currentHP <= 0)
-	{
+	{	
 		//DIE 
 		bossState = EBossState::DIE;
 		Die();
@@ -384,18 +373,17 @@ void ABossCharacter::OnDealDamageOverlapBegin(class UPrimitiveComponent* Overlap
 	if (player != nullptr)
 	{	
 		player->PlayerDamaged();
-		UE_LOG(LogTemp, Warning, TEXT("PlayerDamaged"));
 	}
 }
 
 void ABossCharacter::Die()
 {	
+	//죽는애님몽타주 실행 
+	PlayAnimMontage(death_Montage);
 	//콜리전 다 꺼버림
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	leftFootCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	rightFootCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	GetCharacterMovement()->DisableMovement();
-
-	PlayAnimMontage(death_Montage);
 }
