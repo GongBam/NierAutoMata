@@ -37,6 +37,7 @@ void APlayerPodBullet::BeginPlay()
 {
 	Super::BeginPlay();
 	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &APlayerPodBullet::OnoverlapEnermy);
+	SetLifeSpan(1.0f);
 }
 
 // Called every frame

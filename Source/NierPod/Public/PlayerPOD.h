@@ -33,6 +33,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	TSubclassOf<class APlayerPodBullet> bullet_bp;
 
+	float ShotTime = 0.0f;
+	bool bShootReady = true;
 
 	void Shooting();
 
