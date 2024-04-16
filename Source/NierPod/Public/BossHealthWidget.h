@@ -14,13 +14,13 @@ class NIERPOD_API UBossHealthWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
-protected:
-	virtual void NativeTick(const FGeometry& BossGeometry, float DeltaSeconds) override;
 
 public:
 
 	UPROPERTY(EditAnywhere, Category = "BossSettings", meta=(BindWidget))
 	class UProgressBar* BossHealthBar;
+
+	void SetHealthBar(float value);
 
 	class ABossCharacter* bossCharacter;
 

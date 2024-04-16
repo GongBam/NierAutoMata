@@ -9,6 +9,7 @@
 #include "Components/BoxComponent.h"
 #include "Shield.h"
 #include "BossHealthWidget.h"
+#include "Components/WidgetComponent.h"
 
 ABossCharacter::ABossCharacter()
 {
@@ -23,6 +24,8 @@ ABossCharacter::ABossCharacter()
 	rightFootCollision -> SetupAttachment(GetMesh(), TEXT("RightFootToeBaseSocket"));
 	rightFootCollision -> SetRelativeLocation(FVector(-10, -20, 0));
 	rightFootCollision -> SetRelativeScale3D(FVector(0.2f,0.2f,0.2f));
+
+	bosswidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("Boss Health Widget Component"));
 
 	leftFootCollision -> OnComponentBeginOverlap.AddDynamic(this, &ABossCharacter::OnDealDamageOverlapBegin);
 	rightFootCollision -> OnComponentBeginOverlap.AddDynamic(this, &ABossCharacter::OnDealDamageOverlapBegin);
@@ -53,6 +56,8 @@ void ABossCharacter::BeginPlay()
 	
 	//현재 체력 max 로 초기화
 	currentHP = maxHP;
+
+	bossUI = Cast<UBossHealthWidget>(bosswidgetComp->GetWidget());
 
 	//체력바 UI 위젯 
 	if (bossHealthWidget_bp != nullptr)
@@ -349,6 +354,10 @@ void ABossCharacter::OnDamaged(int32 dmg)
 	}
 	//HP값이 0 ~ maxHP 값 사이에만 있을 수 있게 설정
 	currentHP = FMath::Clamp(currentHP - dmg, 0, maxHP);
+	if (bossUI != nullptr)
+	{
+		bossUI->SetHealthBar((float)currentHP / (float)maxHP);
+	}
 
 	// 데미지 계산 결과, 현재 체력이 0 보다 크면
 	if (currentHP > 0)

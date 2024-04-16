@@ -4,11 +4,7 @@
 #include "BossCharacter.h"
 #include <../../../../../../../Source/Runtime/UMG/Public/Components/ProgressBar.h>
 
-void UBossHealthWidget::NativeTick(const FGeometry& BossGeometry, float DeltaSeconds)
+void UBossHealthWidget::SetHealthBar(float value)
 {
-	if (bossCharacter != nullptr)
-	{
-		BossHealthBar->SetPercent(bossCharacter->GetHealth() / bossCharacter->GetMaxHealth());
-	}
-
+	BossHealthBar->SetPercent(value);
 }

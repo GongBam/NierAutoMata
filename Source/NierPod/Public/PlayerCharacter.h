@@ -41,6 +41,9 @@ public:
 	float GetMaxHealth();
 
 	UPROPERTY(EditAnywhere, Category = "PlayerSettings")
+	class UWidgetComponent* playerwidgetComp;
+
+	UPROPERTY(EditAnywhere, Category = "PlayerSettings")
 	int32 currentHP;
 
 	UPROPERTY(EditAnywhere, Category = "PlayerSettings")
@@ -98,6 +101,8 @@ protected:
 	// HeavyAttack
 	bool PerformHeavyAttack(int32 attackIndex);
 	void ResetHeavyAttackVariables();
+
+	void PlayerDie();
 
 
 	UFUNCTION()

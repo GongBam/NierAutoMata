@@ -79,18 +79,21 @@ public:
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
 	TSubclassOf<class AShield> shield;
 
+	UPROPERTY()
+	class AActor* target;
+
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
 	TSubclassOf<class UBossHealthWidget> bossHealthWidget_bp;
+
+	UPROPERTY(EditAnywhere, Category = "BossSettings")
+	class UWidgetComponent* bosswidgetComp;
 
 	double GetMaxHealth();
 	double GetHealth();
 private:
 
 	class UBossHealthWidget* bossUI;
-	
 
-	UPROPERTY()
-	class AActor* target;
 
 	float currentTime = 0;
 

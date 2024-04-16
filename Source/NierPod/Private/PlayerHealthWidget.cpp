@@ -4,12 +4,7 @@
 #include "PlayerCharacter.h"
 #include <../../../../../../../Source/Runtime/UMG/Public/Components/ProgressBar.h>
 
-void UPlayerHealthWidget::NativeTick(const FGeometry& PlayerGeometry, float DeltaSeconds)
+void UPlayerHealthWidget::SetHealthBar(float value)
 {
-
-	if (playerCharacter != nullptr)
-	{
-		playerHealthBar->SetPercent(playerCharacter->GetCurrentHealth() / playerCharacter->GetMaxHealth());
-	}
-
+	playerHealthBar->SetPercent(value);
 }

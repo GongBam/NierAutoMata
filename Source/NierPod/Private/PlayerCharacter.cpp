@@ -16,6 +16,7 @@
 #include "PlayerPOD.h"
 #include "EngineUtils.h"
 #include "PlayerHealthWidget.h"
+#include "Components/WidgetComponent.h"
 
 
 
@@ -43,6 +44,8 @@ APlayerCharacter::APlayerCharacter()
     weaponComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Weapon Mesh Component"));
     weaponComp -> SetupAttachment(boxComp);
     weaponComp -> SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+    playerwidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("Player Health Widget Component"));
 
     //플레이어 이동, 시야 설정 
     bUseControllerRotationPitch = false;
@@ -88,6 +91,8 @@ void APlayerCharacter::BeginPlay()
     weaponComp->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnOverlap);
 
 
+    playerUI = Cast<UPlayerHealthWidget>(playerwidgetComp->GetWidget());
+
     //체력바 UI 위젯 
     if (playerHealthWidget_bp != nullptr)
     {
@@ -97,7 +102,6 @@ void APlayerCharacter::BeginPlay()
             playerUI->AddToViewport();
         }
     }
-
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -337,8 +341,25 @@ void APlayerCharacter::ResetHeavyAttackVariables()
 
 void APlayerCharacter::PlayerDamaged()
 {
-    currentHP = currentHP - 10;
-    UE_LOG(LogTemp, Warning, TEXT("Player HP : %d"), currentHP);
+    currentHP = FMath::Clamp(currentHP - 10, 0, maxHP);
+    //맞았을 때 (체력이 아직 0보다 크면)
+        if(playerUI != nullptr)
+        {
+            playerUI->SetHealthBar((float)currentHP / (float)maxHP);
+        }
+    if (currentHP > 0)
+    {
+    }
+    // 맞았을 때 체력이 0이거나 0보다 작아지면
+    if (currentHP <= 0)
+    {
+        PlayerDie();
+    }
+
+ //   UE_LOG(LogTemp, Warning, TEXT("Player HP : %d"), currentHP);
+
+
+
 }
 
 float APlayerCharacter::GetCurrentHealth()
@@ -367,4 +388,12 @@ void APlayerCharacter::RightAttack(const FInputActionValue& InputValue)
 
     PerformHeavyAttack(HeavyAttackIndex);
 
+}
+
+
+//플레이어 죽는 함수 
+void APlayerCharacter::PlayerDie()
+{
+
+    
 }
