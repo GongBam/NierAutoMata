@@ -89,9 +89,9 @@ void ABossCharacter::Tick(float DeltaTime)
 	case EBossState::MOVE:
 		MoveToTarget(DeltaTime);
 		break;
-	case EBossState::ROLLING:
-		Rolling(DeltaTime);
-		break;
+	//case EBossState::ROLLING:
+		//Rolling(DeltaTime);
+		//break;
 	case EBossState::ATTACKREADY:
 		AttackReady();
 		break;
@@ -252,10 +252,10 @@ void ABossCharacter::MoveToTarget(float deltaSeconds)
 }
 
 // 앞구르기 
-void ABossCharacter::Rolling(float deltaSeconds)
-{
+//void ABossCharacter::Rolling(float deltaSeconds)
+//{
 		
-}
+//}
 //ATTACK 후 잠시 Delay
 void ABossCharacter::AttackDelay(float deltaSeconds)
 {	
