@@ -89,9 +89,9 @@ void ABossCharacter::Tick(float DeltaTime)
 	case EBossState::MOVE:
 		MoveToTarget(DeltaTime);
 		break;
-	//case EBossState::ROLLING:
-		//Rolling(DeltaTime);
-		//break;
+	case EBossState::ROLLING:
+		Rolling(DeltaTime);
+		break;
 	case EBossState::ATTACKREADY:
 		AttackReady();
 		break;
@@ -128,6 +128,21 @@ void ABossCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
+void ABossCharacter::CheckDistance()
+{
+	//플레이어 거리가 attackDistance 보다 멀리 있으면 다시 쫓아감
+	if (FVector::Distance(GetActorLocation(), target->GetActorLocation()) > attackDistance &&
+		FVector::Distance(GetActorLocation(), target->GetActorLocation()) < rollingDistance)
+	{
+		bossState = EBossState::MOVE;
+	}
+	//플레이어 거리가 많이 멀면 한번 구름 
+	if (FVector::Distance(GetActorLocation(), target->GetActorLocation()) > rollingDistance)
+	{
+		bossState = EBossState::ROLLING;
+	}
+}
+
 void ABossCharacter::Idle(float DeltaSeconds)
 {	
 	//보스 피가 900 이하라면 MOVE 상태로 전환 - 페이즈 시작
@@ -138,8 +153,10 @@ void ABossCharacter::Idle(float DeltaSeconds)
 }
 
 void ABossCharacter::AttackReady()
-{
+{	// 특정 STATE 와 중복되지 않게 막기 
 	if (bossState == EBossState::BLOCK) { return; }
+	if (bossState == EBossState::BLOCKATTACK) { return; }
+	if (bossState == EBossState::ROLLING) { return; }
 
 	UE_LOG(LogTemp, Warning, TEXT("READY TO ATTACK PLAYER"));
 	//플레이어 거리가 attackDistance 보다 작으면
@@ -159,10 +176,9 @@ void ABossCharacter::AttackReady()
 				bossState = EBossState::JUMPATTACK;
 			}
 	}
-	//플레이어 거리가 attackDistance 보다 멀리 있으면 다시 쫓아감
-	else
+	else 
 	{
-		bossState = EBossState::MOVE;
+		CheckDistance();
 	}
 }
 
@@ -170,17 +186,14 @@ void ABossCharacter::Attack()
 {
 	if (bossState == EBossState::BLOCK) {return;}
 
-	//플레이어 거리가 attackDistance 보다 작으면
+	//플레이어 거리가 공격범위 안에 있으면 공격 후 딜레이 
 	if (FVector::Distance(GetActorLocation(), target->GetActorLocation()) < attackDistance + 10.0f)
 	{	
-
-		UE_LOG(LogTemp, Warning, TEXT("Boss Kick!"));
 		bossState = EBossState::ATTACKDELAY;
 	}
-	//플레이어 거리가 attackDistance 보다 크면
 	else
-	{	//플레이어 다시 따라감
-		bossState = EBossState::MOVE;
+	{
+		CheckDistance();
 	}
 }
 
@@ -188,16 +201,14 @@ void ABossCharacter::Attack2()
 {
 	if (bossState == EBossState::BLOCK) {return;}
 
-	//플레이어 거리가 attackDistance 보다 작으면
+	//플레이어 거리가 공격범위 안에 있으면 공격 후 딜레이 
 	if (FVector::Distance(GetActorLocation(), target->GetActorLocation()) < attackDistance + 10.0f)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Boss Kick 2 !"));
+	{	
 		bossState = EBossState::ATTACKDELAY;
 	}
-	//플레이어 거리가 attackDistance 보다 크면
 	else
-	{	//플레이어 다시 따라감
-		bossState = EBossState::MOVE;
+	{
+		CheckDistance();
 	}
 }
 
@@ -205,16 +216,15 @@ void ABossCharacter::JumpAttack()
 {
 	if (bossState == EBossState::BLOCK) { return; }
 
-	//플레이어 거리가 attackDistance 보다 작으면
+	//플레이어 거리가 공격범위 안에 있으면 공격 후 딜레이 
 	if (FVector::Distance(GetActorLocation(), target->GetActorLocation()) < attackDistance + 10.0f)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Boss Jump Kick !"));
 		bossState = EBossState::ATTACKDELAY;
 	}
-	//플레이어 거리가 attackDistance 보다 크면
 	else
-	{	//플레이어 다시 따라감
-		bossState = EBossState::MOVE;
+	{
+		CheckDistance();
 	}
 }
 //플레이어 쫓아가는 함수
@@ -225,7 +235,7 @@ void ABossCharacter::MoveToTarget(float deltaSeconds)
 	targetDir.Z = 0;
 
 	// 플레이어가 공격범위 밖이라면
-	if (targetDir.Length() > attackDistance)
+	if (targetDir.Length() > attackDistance && targetDir.Length() < rollingDistance)
 	{
 		//플레이어 따라감
 		GetCharacterMovement()->MaxWalkSpeed = traceSpeed;
@@ -244,6 +254,10 @@ void ABossCharacter::MoveToTarget(float deltaSeconds)
 				bossState = EBossState::BLOCK;
 			}), 5.0f, false);
 	}
+	if (targetDir.Length() > rollingDistance)
+	{
+		bossState = EBossState::ROLLING;
+	}
 	// 플레이어가 공격범위 안에 있다면 + 공격당하지 않았다면 
 	if (targetDir.Length() <= attackDistance && bIsAttacked == false)
 	{	// 어택준비로 전환
@@ -252,50 +266,93 @@ void ABossCharacter::MoveToTarget(float deltaSeconds)
 }
 
 // 앞구르기 
-//void ABossCharacter::Rolling(float deltaSeconds)
-//{
-		
-//}
-//ATTACK 후 잠시 Delay
+void ABossCharacter::Rolling(float deltaSeconds)
+{	
+	UE_LOG(LogTemp, Warning, TEXT("ROLLING"));
+	// 특정 STATE와 중복되지 않게 막기 
+	if (bossState == EBossState::BLOCK) {return;}
+	if (bossState == EBossState::DAMAGED) {return;}
+	if (bossState == EBossState::BLOCKATTACK) {return;}
+
+	//플레이어 방향백터
+	FVector targetDir = target->GetActorLocation() - GetActorLocation();
+	targetDir.Z = 0;
+
+	//플레이어 쪽으로 구름 
+	GetCharacterMovement()->MaxWalkSpeed = 1000;
+	AddMovementInput(targetDir.GetSafeNormal());
+
+	//이동 방향으로 회전
+	FRotator currentRot = GetActorRotation();
+	FRotator targetRot = targetDir.ToOrientationRotator();
+	FRotator calcRot = FMath::Lerp(currentRot, targetRot, deltaSeconds * rotSpeed);
+	SetActorRotation(calcRot);
+
+	FTimerHandle rollingTimer;
+	GetWorldTimerManager().SetTimer(rollingTimer, FTimerDelegate::CreateLambda([&]()
+		{	
+			// 플레이어가 공격범위 안에 있다면 + 공격당하지 않았다면 
+			if (targetDir.Length() <= attackDistance && bIsAttacked == false)
+			{	// 어택준비로 전환
+				bossState = EBossState::ATTACKREADY;
+			}
+			// 플레이어가 공격범위 안에 없다면 다시 쫓아감 
+			if (targetDir.Length() > attackDistance && bIsAttacked == false)
+			{
+				bossState = EBossState::MOVE;
+			}
+		}), 1.0f, false);
+	if (bossState == EBossState::ROLLING) { return; }
+}
+ //ATTACK 후 잠시 Delay
 void ABossCharacter::AttackDelay(float deltaSeconds)
 {	
 	currentTime += deltaSeconds;
-	if (currentTime > attackDelayTime && bIsAttacked == false)
-	{	
-		//다음 공격 준비 
+	if (currentTime > attackDelayTime + 10 && bIsAttacked == false)
+	{	//다음 공격 준비 
 		currentTime = 0;
 		bossState = EBossState::ATTACKREADY;
-		//플레이어가 반경 벗어나면 다시 쫓아감 
-		if(FVector::Distance(GetActorLocation(), target->GetActorLocation()) > attackDistance + 10.f)
-		{	
-			if(currentTime > attackDelayTime)
-			{	
-			currentTime = 0;
-			bossState = EBossState::MOVE;
-			}
-		}
+	}
+	else
+	{
+		CheckDistance();
+	}
+	if (bIsAttacked == true)
+	{
+		return;
 	}
 }
 
 void ABossCharacter::Blocking(float deltaSeconds)
-{	//보스 피가 800 이하로 깎였을 때 부터 방어 시작
-		//제자리에서 쉴드 생성
+{
+	if (shieldSpawn == false)
+	{
+		//보스 피가 800 이하로 깎였을 때 부터 방어 시작
+			//제자리에서 쉴드 생성
 		GetWorld()->SpawnActor<AShield>(shield, GetActorLocation(), GetActorRotation());
 		SetActorLocation(GetActorLocation());
+		shieldSpawn = true;
+
 		//2 초 지났을 때 (Shield : 1.5초 뒤 저절로 사라짐)
 		FTimerHandle blockingTimer;
 		GetWorldTimerManager().SetTimer(blockingTimer, FTimerDelegate::CreateLambda([&]()
 			{
 				bossState = EBossState::BLOCKATTACK;
+				shieldSpawn = false;
 			}), 1.0f, false);
-		
+	}
 }
 
 void ABossCharacter::BlocKAttack()
-{
-	//쉴드공격 후 MOVE 전환
+{	
+
 	UE_LOG(LogTemp, Warning, TEXT("SHIELD ATTACK"));
-	bossState = EBossState::ATTACKDELAY;
+	//쉴드공격 후 어택딜레이로 전환 : 방어 중이었으므로 거리조건 일단 추가 안함 
+	FTimerHandle blockattackingTimer;
+	GetWorldTimerManager().SetTimer(blockattackingTimer, FTimerDelegate::CreateLambda([&]()
+		{
+			bossState = EBossState::ATTACKDELAY;
+		}), 1.0f, false);
 }
 
 void ABossCharacter::DamageProcess(float deltaSeconds)
@@ -309,9 +366,8 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 		FTimerHandle hitTimer;
 		GetWorldTimerManager().SetTimer(hitTimer, FTimerDelegate::CreateLambda([&]()
 			{
-				bossState = EBossState::IDLE;
+			bossState = EBossState::IDLE;
 			}), 1.0f, false);
-
 	}
 	//보스 체력이 900 이하라면 
 	if(currentHP <= 900)

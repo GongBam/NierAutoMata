@@ -11,6 +11,7 @@ enum class EBossState : uint8
 	IDLE		UMETA(DisplayName = "Base State"),
 	MOVE		UMETA(DisplayName = "walk State"),
 	ATTACKREADY UMETA(DisplayName = "Attack Ready State"),
+	ROLLING		UMETA(DisplayName = "Rolling State"),
 	ATTACK		UMETA(DisplayName = "Attack State"),
 	ATTACK2     UMETA(DisplayName = "Attack2 State"),
 	JUMPATTACK  UMETA(DisplayName = "Jump Attack State"),
@@ -47,9 +48,10 @@ public:
 	float traceSpeed = 200.0f;
 
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
+	float attackDistance = 50.0f;
 
-	float attackDistance = 100.0f;
-
+	UPROPERTY(EditAnywhere, Category = "BossSettings")
+	float rollingDistance = 300.0f;
 
 	float rotSpeed = 5.0f;
 
@@ -98,16 +100,19 @@ private:
 	int32 currentHP = 0;
 	FVector hitLocation;
 	bool bIsAttacked = false;
+	bool shieldSpawn = false;
 
 
+	void CheckDistance();
+
+
+	//STATE 관련 함수 
 	void Idle(float DeltaSeconds);
-
-
 	void AttackReady();
 	void Attack();
 	void Attack2();
 	void JumpAttack();
-
+	void Rolling(float deltaSeconds);
 	void MoveToTarget(float deltaSeconds);
 	void AttackDelay(float deltaSeconds);
 	void Blocking(float deltaSeconds);
