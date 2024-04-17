@@ -83,10 +83,10 @@ void APlayerCharacter::BeginPlay()
     playerAnim = Cast<UTEST2BAnimInstance>(GetMesh()->GetAnimInstance());
     weaponComp->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnOverlap);
 
-
+    // 체력바 UI 위젯 캐싱 
     playerUI = Cast<UPlayerHealthWidget>(playerwidgetComp->GetWidget());
 
-    //체력바 UI 위젯 
+    //체력바 UI 위젯 붙임 
     if (playerHealthWidget_bp != nullptr)
     {
         playerUI = CreateWidget<UPlayerHealthWidget>(GetWorld(), playerHealthWidget_bp);
@@ -107,7 +107,22 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+<<<<<<< Updated upstream
     UEnhancedInputComponent* enhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+=======
+    if (UEnhancedInputComponent* Input = CastChecked <UEnhancedInputComponent>(PlayerInputComponent))
+    {   //인풋-함수 바인드
+        Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
+        Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
+        Input->BindAction(JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::Jump);
+        Input->BindAction(DashAction, ETriggerEvent::Started, this, &APlayerCharacter::Dash);
+        Input->BindAction(DodgeAction, ETriggerEvent::Started, this, &APlayerCharacter::DodgeFunction);
+        Input->BindAction(LeftAttackAction, ETriggerEvent::Started, this, &APlayerCharacter::LeftAttack);
+        Input->BindAction(RightAttackAction, ETriggerEvent::Started, this, &APlayerCharacter::RightAttack);
+        Input->BindAction(shooting, ETriggerEvent::Triggered, this, &APlayerCharacter::Shot);
+        Input->BindAction(damaging, ETriggerEvent::Started, this, &APlayerCharacter::DAMAGING);
+    }
+>>>>>>> Stashed changes
 
     if(enhancedInputComponent != nullptr)
     {
@@ -130,7 +145,12 @@ void APlayerCharacter::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActo
     }
 }
 
+<<<<<<< Updated upstream
 void APlayerCharacter::PlayerMove(const FInputActionValue& Value)
+=======
+//이동
+void APlayerCharacter::Move(const FInputActionValue& InputValue)
+>>>>>>> Stashed changes
 {
     FVector2D inputValue = Value.Get<FVector2D>();
     moveDirection = FVector(inputValue.Y, inputValue.X, 0);
@@ -193,6 +213,120 @@ void APlayerCharacter::Shot(const FInputActionValue& InputValue)
 }
 
 
+<<<<<<< Updated upstream
+=======
+void APlayerCharacter::SetActionState(EStateType eState)
+{
+    if (eActionState != eState)
+    {
+        eActionState = eState;
+    }
+}
+
+void APlayerCharacter::PerformDodge()
+{
+    SetActionState(EStateType::Nothing);
+
+    if (DodgeMontage != nullptr)
+    {
+        PlayAnimMontage(DodgeMontage);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("DodgeMontage Is Null"));
+    }
+}
+
+// 임시로 보스 데미지주는 함수 
+void APlayerCharacter::DAMAGING(const FInputActionValue& InputValue)
+{
+   
+    for(TActorIterator<ABossCharacter> iter(GetWorld()); iter; ++iter)
+    {
+        bossCharacter = *iter;
+      if (bossCharacter != nullptr)
+      {   
+          bossCharacter->OnDamaged(damage + 50);
+      }
+    }
+}
+
+// PerformLightAttack
+bool APlayerCharacter::PerformLightAttack(int32 attackIndex)
+{
+    UAnimMontage* selectedLightAttackMontage = lightAttackMontages[attackIndex];
+
+    if (IsValid(selectedLightAttackMontage))
+    {   
+        SetActionState(EStateType::Attack);
+
+        PlayAnimMontage(selectedLightAttackMontage);
+
+        LightAttackIndex++;
+
+
+        if (LightAttackIndex >= lightAttackMontages.Num())
+        {
+            LightAttackIndex = 0;
+        }
+
+        return true;
+    }
+    else
+    {
+        FString strMessage = FString(TEXT("Attack Montage Not Valid"));
+        UKismetSystemLibrary::PrintString(GetWorld(), *strMessage);
+
+        return false;
+    }
+
+    return false;
+}
+
+// Reset Light Attack Variables
+void APlayerCharacter::ResetLightAttackVariables()
+{
+    LightAttackIndex = 0;
+    LightAttackSaved = false;
+
+
+}
+
+bool APlayerCharacter::PerformHeavyAttack(int32 attackIndex)
+{
+    UAnimMontage* selectedHeavyAttackMontage = heavyAttackMontages[attackIndex];
+
+    if (IsValid(selectedHeavyAttackMontage)) {
+     
+        SetActionState(EStateType::Attack);
+
+        PlayAnimMontage(selectedHeavyAttackMontage);
+
+        HeavyAttackIndex++;
+
+
+        if (HeavyAttackIndex >= heavyAttackMontages.Num()) {
+            HeavyAttackIndex = 0;
+        }
+        return true;
+    }
+    else {
+        FString strMessage = FString(TEXT("Attack Montage Not Valid"));
+        UKismetSystemLibrary::PrintString(GetWorld(), *strMessage);
+
+        return false;
+    }
+    return false;
+}
+
+void APlayerCharacter::ResetHeavyAttackVariables()
+{
+    HeavyAttackIndex = 0;
+    HeavyAttackSaved = false;
+
+}
+
+>>>>>>> Stashed changes
 void APlayerCharacter::PlayerDamaged()
 {
     currentHP = FMath::Clamp(currentHP - 10, 0, maxHP);
@@ -209,9 +343,30 @@ void APlayerCharacter::PlayerDamaged()
     {
         PlayerDie();
     }
+<<<<<<< Updated upstream
 
  //   UE_LOG(LogTemp, Warning, TEXT("Player HP : %d"), currentHP);
  }
+=======
+}
+
+void APlayerCharacter::LeftAttack(const FInputActionValue& InputValue)
+{
+    UE_LOG(LogTemp, Warning, TEXT("LeftAttack"));
+
+    PerformLightAttack(LightAttackIndex);
+
+}
+
+void APlayerCharacter::RightAttack(const FInputActionValue& InputValue)
+{
+    UE_LOG(LogTemp, Warning, TEXT("RightAttack"));
+
+    PerformHeavyAttack(HeavyAttackIndex);
+
+}
+
+>>>>>>> Stashed changes
 
 //플레이어 죽는 함수 
 void APlayerCharacter::PlayerDie()
