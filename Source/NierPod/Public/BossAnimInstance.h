@@ -36,6 +36,12 @@ private:
 
 	UFUNCTION()
 	void AnimNotify_Destroy();
+
+	 UFUNCTION()
+	 void AnimNotify_start();
+
+	 UFUNCTION()
+	 void AnimNotify_end();
 	
 	
 };

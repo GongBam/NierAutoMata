@@ -19,6 +19,7 @@ enum class EBossState : uint8
 	BLOCK		UMETA(DisplayName = "Block State"),
 	BLOCKATTACK UMETA(DisplayName = "Block Attack State"),
 	DAMAGED		UMETA(DisplayName = "Damaged State"),
+	PHASECHANGE UMETA(DisplayName = "Phase Changing State"),
 	DIE			UMETA(DisplayName = "Dead State")
 };
 
@@ -64,8 +65,19 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void BoxCollisionReset();
 
+	UFUNCTION(BlueprintCallable)
+	void PhaseChangeStart();
+
+	UFUNCTION(BlueprintCallable)
+	void PhaseChangeEnd();
+
+	bool bPhaseChanging = false;
+
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
 	class UAnimMontage* death_Montage;
+	 
+	UPROPERTY(EditAnywhere, Category = "BossSettings")
+	class UAnimMontage* phaseChaingingMontage;
 
 	void OnDamaged(int32 dmg);
 
@@ -124,6 +136,7 @@ private:
 	void Blocking(float deltaSeconds);
 	void BlocKAttack(float deltaSeconds);
 	void DamageProcess(float deltaSeconds);
+	void Phasing(float deltaSeconds);
 	void Die();
 
 

@@ -43,3 +43,13 @@ void UBossAnimInstance::AnimNotify_Destroy()
 			}), 5.0f, false);
 	}
 }
+
+void UBossAnimInstance::AnimNotify_start()
+{
+	boss->PhaseChangeStart();
+}
+
+void UBossAnimInstance::AnimNotify_end()
+{
+	boss->PhaseChangeEnd();
+}

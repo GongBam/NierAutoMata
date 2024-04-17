@@ -116,6 +116,9 @@ void ABossCharacter::Tick(float DeltaTime)
 	case EBossState::DAMAGED:
 		DamageProcess(DeltaTime);
 		break;
+	case EBossState::PHASECHANGE:
+		Phasing(DeltaTime);
+		break;
 	case EBossState::DIE:
 		break;
 	default:
@@ -354,25 +357,38 @@ void ABossCharacter::BlocKAttack(float deltaSeconds)
 void ABossCharacter::DamageProcess(float deltaSeconds)
 {
 	bIsAttacked = false;
-
-	currentTime += deltaSeconds;
-	if(currentTime > 0.5f)
+	if (currentHP <= 500 && currentHP >= 490)
 	{
-		currentTime = 0;
-	//보스 체력이 900 이하가 아니라면 
-	if(currentHP > 900)
-	{		
-		//피격모션 후 IDLE 
-			bossState = EBossState::IDLE;
+		UE_LOG(LogTemp, Warning, TEXT("PhaseChanged"));
+		PlayAnimMontage(phaseChaingingMontage);
 	}
-	//보스 체력이 900 이하라면 
-	else 
+	else
 	{
-
-		//피격모션 후 플레이어 쫓아감 
-		bossState = EBossState::MOVE;
-	}	
+		currentTime += deltaSeconds;
+		if (currentTime > 0.5f)
+		{
+			currentTime = 0;
+			//보스 체력이 900 이하가 아니라면 
+			if (currentHP > 900)
+			{
+				//피격모션 후 IDLE 
+				bossState = EBossState::IDLE;
+			}
+			//보스 체력이 900 이하라면 
+			else if (currentHP <= 900 && currentHP >= 500)
+			{
+				//피격모션 후 플레이어 쫓아감 
+				bossState = EBossState::MOVE;
+			}
+		}
 	}
+}
+
+void ABossCharacter::Phasing(float deltaSeconds)
+{	
+	UE_LOG(LogTemp, Warning, TEXT("PASHING"));
+	if (bossState == EBossState::PHASECHANGE) {return;}
+	PlayAnimMontage(phaseChaingingMontage);
 }
 
 void ABossCharacter::BoxCollisionExtending()
@@ -386,10 +402,24 @@ void ABossCharacter::BoxCollisionReset()
 	rightFootCollision->SetRelativeScale3D(FVector(0.2f));
 	leftFootCollision->SetRelativeScale3D(FVector(0.2f));
 }
-
+void ABossCharacter::PhaseChangeStart()
+{
+	UE_LOG(LogTemp, Warning, TEXT("PS"));
+	bPhaseChanging = true;
+}
+void ABossCharacter::PhaseChangeEnd()
+{
+	UE_LOG(LogTemp, Warning, TEXT("PE"));
+	bPhaseChanging = false;
+	FTimerHandle phaseTimer;
+	GetWorldTimerManager().SetTimer(phaseTimer, FTimerDelegate::CreateLambda([&]() {
+		bossState = EBossState::MOVE;
+		}), 2.0f, false);
+}
 //보스 데미지받는 함수
 void ABossCharacter::OnDamaged(int32 dmg)
 {
+	if (bPhaseChanging == true) {return;}
 	//보스가 공격중 / 방어중 일 땐 데미지 적용 X 
 	if (bossState == EBossState::ATTACK || bossState == EBossState::ATTACK2
 		|| bossState == EBossState::JUMPATTACK || bossState == EBossState::BLOCK 
