@@ -48,10 +48,10 @@ public:
 	float traceSpeed = 200.0f;
 
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
-	float attackDistance = 50.0f;
+	float attackDistance = 120.0f;
 
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
-	float rollingDistance = 300.0f;
+	float rollingDistance = 800.0f;
 
 	float rotSpeed = 5.0f;
 
@@ -92,6 +92,12 @@ public:
 
 private:
 
+	FTimerHandle blockTimer;
+	FTimerHandle rollingTimer;
+	FTimerHandle blockingTimer;
+	FTimerHandle blockAttackingTimer;
+	FTimerHandle hitTimer;
+
 	class UBossHealthWidget* bossUI;
 
 
@@ -116,7 +122,7 @@ private:
 	void MoveToTarget(float deltaSeconds);
 	void AttackDelay(float deltaSeconds);
 	void Blocking(float deltaSeconds);
-	void BlocKAttack();
+	void BlocKAttack(float deltaSeconds);
 	void DamageProcess(float deltaSeconds);
 	void Die();
 
