@@ -36,6 +36,8 @@ public:
 	class UInputAction* ia_shot;
 	UPROPERTY(EditAnywhere, category = "MySettings|Inputs")
 	class UInputAction* ia_look;
+	UPROPERTY(EditAnywhere, category = "MySettings|Inputs")
+	class UInputAction* ia_damaging;
 
 
 	UFUNCTION()
@@ -67,49 +69,16 @@ protected:
 	FVector moveDirection;
 
 
-	//이동, 시야, 점프 함수 
-<<<<<<< Updated upstream
-	UFUNCTION()
-	void PlayerMove(const FInputActionValue& Value);
-	UFUNCTION()
-	void Look(const FInputActionValue& Value);
-	UFUNCTION()
-	void PlayerJump(const FInputActionValue& Value);
-	UFUNCTION()
-	void PlayerJumpEnd(const FInputActionValue& Value);
-	UFUNCTION()
-	void Shot(const FInputActionValue& Value);
-	UFUNCTION()
-=======
-	void Move(const FInputActionValue& InputValue);
-	void Look(const FInputActionValue& InputValue);
-	void Jump();
-
-	//공격 함수
-	void Dash(const FInputActionValue& InputValue);
-	void DodgeFunction(const FInputActionValue& InputValue);
-	void Shot(const FInputActionValue& InputValue);
-	
-	//void ResetDoubleJump();
-
-	void SetActionState(EStateType eState);
-
-	// Dodge
-	void PerformDodge();
-	void SaveDodge();
-
 	//임시로 보스 데미지주는 함수
-	void DAMAGING(const FInputActionValue& InputValue);
+	void DAMAGING(const FInputActionValue& Value);
 
-	// LightAttack
-	bool PerformLightAttack(int32 attackIndex);
-	void ResetLightAttackVariables();
+	void Look(const FInputActionValue& Value);
+	void PlayerMove(const FInputActionValue& Value);
+	void PlayerJump(const FInputActionValue& Value);
+	void PlayerJumpEnd(const FInputActionValue& Value);
+	void Shot(const FInputActionValue& Value);
 
-	// HeavyAttack
-	bool PerformHeavyAttack(int32 attackIndex);
-	void ResetHeavyAttackVariables();
-
->>>>>>> Stashed changes
+	
 	void PlayerDie();
 
 
@@ -123,45 +92,6 @@ protected:
 	class APlayerController* pc;
 	class UTEST2BAnimInstance* playerAnim;
 
-<<<<<<< Updated upstream
-=======
-	//인풋액션
-	UPROPERTY(EditAnywhere, Category = "EnhancedInput")
-	class UInputAction* MoveAction;
-
-	UPROPERTY(EditAnywhere, Category = "EnhancedInput")
-	class UInputAction* JumpAction;
-
-	UPROPERTY(EditAnywhere, Category = "EnhancedInput")
-	class UInputAction* LookAction;
-
-	UPROPERTY(EditAnywhere, Category = "EnhancedInput")
-	class UInputAction* AttackAction;
-
-	UPROPERTY(EditAnywhere, Category = "EnhancedInput")
-	class UInputAction* LeftAttackAction;
-
-	UPROPERTY(EditAnywhere, Category = "EnhancedInput")
-	class UInputAction* RightAttackAction;
-
-	UPROPERTY(EditAnywhere, Category = "EnhancedInput")
-	class UInputAction* shooting;
-
-	UPROPERTY(EditAnywhere, Category = "EnhancedInput")
-	class UInputAction* damaging;
-
-
-
-	// 대쉬
-	UPROPERTY(EditAnywhere, Category = "EnhancedInput")
-	class UInputAction* DashAction;
-
-	// 닷지
-	UPROPERTY(EditAnywhere, Category = "EnhancedInput")
-	class UInputAction* DodgeAction;
-
-	class UAnimInstance* AnimInstance;
-
 	bool canDash = true;
 	FVector OldVelocity;
 	FVector Velocity;
@@ -172,31 +102,4 @@ protected:
 	// 이단 점프
 	bool DoubleJump;
 
-	bool bSaveDodge;
-
-	// 왼쪽 공격
-	EStateType eActionState;
-	int32 LightAttackIndex = 0;
-	bool LightAttackSaved;
-
-	// 오른쪽 공격
-	int32 HeavyAttackIndex = 0;
-	bool HeavyAttackSaved;
-
-	// Dash 몽타주 슬롯 생성
-	UPROPERTY(EditAnywhere, Category = "Montage")
-	class UAnimMontage* DashMontage;
-
-	// Dodge 몽타주 슬롯 생성
-	UPROPERTY(EditAnywhere, Category = "Montage")
-	class UAnimMontage* DodgeMontage;
-
-	// Light Attack Combo 몽타주 배열 생성
-	UPROPERTY(EditAnywhere, Category = "Montage")
-	TArray<class UAnimMontage*> lightAttackMontages;
-
-	// Heavy Attack Combo 몽타주 배열 생성
-	UPROPERTY(EditAnywhere, Category = "Montage")
-	TArray<class UAnimMontage*> heavyAttackMontages;
->>>>>>> Stashed changes
 };
