@@ -1,27 +1,17 @@
 #include "PlayerCharacter.h"
-
-
-#include "PlayerCharacter.h"
-#include "Camera/CameraComponent.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
-#include "InputMappingContext.h"
-#include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
-#include <../../../../../../../Source/Runtime/Engine/Classes/Animation/AnimMontage.h>
-#include "Components/BoxComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/BoxComponent.h"
+#include "Camera/CameraComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "EnhancedInputComponent.h"
 #include "BossCharacter.h"
 #include "PlayerPOD.h"
-#include "EngineUtils.h"
 #include "PlayerHealthWidget.h"
 #include "Components/WidgetComponent.h"
-
-
-
-
-
+#include "EngineUtils.h"
+#include "TEST2BAnimInstance.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -35,7 +25,7 @@ APlayerCharacter::APlayerCharacter()
 
     Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
     Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
-    Camera->bUsePawnControlRotation = false;
+    Camera->bUsePawnControlRotation = true;
 
     boxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("Weapon Box Component"));
     boxComp -> SetupAttachment(GetMesh(), TEXT("WeaponSocket"));
@@ -79,15 +69,18 @@ void APlayerCharacter::BeginPlay()
 
 
     //플레이어 인풋맵핑 생성
-    if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+    pc = GetController<APlayerController>();
+    if(pc!=nullptr)
     {
-        if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+        UEnhancedInputLocalPlayerSubsystem* subsys = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(pc->GetLocalPlayer());
+        
+        if(subsys != nullptr)
         {
-            Subsystem->AddMappingContext(InputMapping, 0);
+            subsys->AddMappingContext(imc_KeyMap, 0);
         }
     }
 
-    AnimInstance = GetMesh()->GetAnimInstance();
+    playerAnim = Cast<UTEST2BAnimInstance>(GetMesh()->GetAnimInstance());
     weaponComp->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnOverlap);
 
 
@@ -107,18 +100,6 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-    // 딜레이 2초 주고 원래 속도로 되돌리기
-    if (canDash == false) {
-        DashCooldown -= DeltaTime;
-        if (DashCooldown <= 0) {
-            //GetCharacterMovement()->Velocity = OldVelocity;
-            GetCharacterMovement()->MaxWalkSpeed = 900.0f;
-            GetCharacterMovement()->MaxAcceleration = 300.0f;
-            DashCooldown = 0.2f;
-            canDash = true;
-        }
-    }
-
 
 }
 
@@ -126,18 +107,18 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-    if (UEnhancedInputComponent* Input = CastChecked <UEnhancedInputComponent>(PlayerInputComponent))
-    {   //인풋-함수 바인드
-        Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
-        Input->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
-        Input->BindAction(JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::Jump);
-        Input->BindAction(DashAction, ETriggerEvent::Started, this, &APlayerCharacter::Dash);
-        Input->BindAction(DodgeAction, ETriggerEvent::Started, this, &APlayerCharacter::DodgeFunction);
-        Input->BindAction(LeftAttackAction, ETriggerEvent::Started, this, &APlayerCharacter::LeftAttack);
-        Input->BindAction(RightAttackAction, ETriggerEvent::Started, this, &APlayerCharacter::RightAttack);
-        Input->BindAction(shooting, ETriggerEvent::Triggered, this, &APlayerCharacter::Shot);
-    }
+    UEnhancedInputComponent* enhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 
+    if(enhancedInputComponent != nullptr)
+    {
+        enhancedInputComponent->BindAction(ia_move, ETriggerEvent::Triggered, this , &APlayerCharacter::PlayerMove);
+        enhancedInputComponent->BindAction(ia_move, ETriggerEvent::Completed, this, &APlayerCharacter::PlayerMove);
+        enhancedInputComponent->BindAction(ia_jump, ETriggerEvent::Started, this, &APlayerCharacter::PlayerJump);
+        enhancedInputComponent->BindAction(ia_jump, ETriggerEvent::Completed, this, &APlayerCharacter::PlayerJumpEnd);
+        enhancedInputComponent->BindAction(ia_shot, ETriggerEvent::Triggered, this, &APlayerCharacter::Shot);
+        enhancedInputComponent->BindAction(ia_look, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
+    }
+    
 }
 
 void APlayerCharacter::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -145,33 +126,37 @@ void APlayerCharacter::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActo
     ABossCharacter* boss = Cast<ABossCharacter>(OtherActor);
     if (boss != nullptr)
     {
-        boss->OnDamaged(damage);
+
     }
 }
 
-
-
-//이동
-void APlayerCharacter::Move(const FInputActionValue& InputValue)
+void APlayerCharacter::PlayerMove(const FInputActionValue& Value)
 {
-    FVector2D InputVector = InputValue.Get<FVector2D>();
-
-    if (IsValid(Controller))
+    FVector2D inputValue = Value.Get<FVector2D>();
+    moveDirection = FVector(inputValue.Y, inputValue.X, 0);
+    if(IsValid(Controller))
     {
         const FRotator Rotation = Controller->GetControlRotation();
-        const FRotator YawRotation(0, Rotation.Yaw, 0);
+        const FRotator YawRotation(0, Rotation.Yaw,0);
 
         const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
         const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
-        AddMovementInput(ForwardDirection, InputVector.Y);
-        AddMovementInput(RightDirection, InputVector.X);
+        AddMovementInput(ForwardDirection, inputValue.Y);
+        AddMovementInput(RightDirection, inputValue.X);
+
+        if (playerAnim != nullptr)
+        {
+            playerAnim->moveDirection = moveDirection;
+        }
     }
+  
 }
-//시야
-void APlayerCharacter::Look(const FInputActionValue& InputValue)
+
+
+void APlayerCharacter::Look(const FInputActionValue& Value)
 {
-    FVector2D InputVector = InputValue.Get<FVector2D>();
+    FVector2D InputVector = Value.Get<FVector2D>();
 
     if (IsValid(Controller))
     {
@@ -179,48 +164,17 @@ void APlayerCharacter::Look(const FInputActionValue& InputValue)
         AddControllerPitchInput(InputVector.Y);
     }
 }
-//점프    // 더블점프는 나중에 가능하면 번역 
-void APlayerCharacter::Jump()
+
+void APlayerCharacter::PlayerJump(const FInputActionValue& InputValue)
 {
-    ACharacter::Jump();
-    /*
-    if (GetCharacterMovement()->IsFalling() != true)
-    {
-        ACharacter::Jump();
-    }
-    */
+    Jump();
 }
 
-// 대쉬
-void APlayerCharacter::Dash(const FInputActionValue& InputValue)
+void APlayerCharacter::PlayerJumpEnd(const FInputActionValue& InputValue)
 {
-    if (canDash == true) {
-        canDash = false;
-        //OldVelocity = GetCharacterMovement()->Velocity;
-        //GetCharacterMovement()->Velocity = GetActorForwardVector() * 5000.0f;
-        // 최대속도 5000 주기
-        GetCharacterMovement()->MaxWalkSpeed = 5000.0f;
-        // 가속도 100000 주기 - 더 빠르게
-        GetCharacterMovement()->MaxAcceleration = 100000.0f;
-        AnimInstance->Montage_Play(DashMontage);
-    }
+    StopJumping();
 }
 
-void APlayerCharacter::DodgeFunction(const FInputActionValue& InputValue)
-{
-    bool bCondition = (eActionState == EStateType::Dodge);
-
-    bCondition ^= true;
-
-    if (bCondition)
-    {
-        PerformDodge();
-    }
-    else
-    {
-        bSaveDodge = true;
-    }
-}
 
 void APlayerCharacter::Shot(const FInputActionValue& InputValue)
 {
@@ -235,109 +189,9 @@ void APlayerCharacter::Shot(const FInputActionValue& InputValue)
         {
             UE_LOG(LogTemp, Warning, TEXT("null"));
         }
-
     }
 }
 
-
-void APlayerCharacter::SetActionState(EStateType eState)
-{
-    if (eActionState != eState)
-    {
-        eActionState = eState;
-    }
-}
-
-void APlayerCharacter::PerformDodge()
-{
-    SetActionState(EStateType::Nothing);
-
-    if (DodgeMontage != nullptr)
-    {
-        PlayAnimMontage(DodgeMontage);
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("DodgeMontage Is Null"));
-    }
-
-
-}
-
-// PerformLightAttack
-bool APlayerCharacter::PerformLightAttack(int32 attackIndex)
-{
-    UAnimMontage* selectedLightAttackMontage = lightAttackMontages[attackIndex];
-
-    if (IsValid(selectedLightAttackMontage))
-    {   
-        SetActionState(EStateType::Attack);
-
-        PlayAnimMontage(selectedLightAttackMontage);
-
-        LightAttackIndex++;
-
-
-        if (LightAttackIndex >= lightAttackMontages.Num())
-        {
-            LightAttackIndex = 0;
-        }
-
-        return true;
-    }
-    else
-    {
-        FString strMessage = FString(TEXT("Attack Montage Not Valid"));
-        UKismetSystemLibrary::PrintString(GetWorld(), *strMessage);
-
-        return false;
-    }
-
-    return false;
-}
-
-// Reset Light Attack Variables
-void APlayerCharacter::ResetLightAttackVariables()
-{
-    LightAttackIndex = 0;
-    LightAttackSaved = false;
-
-
-}
-
-bool APlayerCharacter::PerformHeavyAttack(int32 attackIndex)
-{
-    UAnimMontage* selectedHeavyAttackMontage = heavyAttackMontages[attackIndex];
-
-    if (IsValid(selectedHeavyAttackMontage)) {
-     
-        SetActionState(EStateType::Attack);
-
-        PlayAnimMontage(selectedHeavyAttackMontage);
-
-        HeavyAttackIndex++;
-
-
-        if (HeavyAttackIndex >= heavyAttackMontages.Num()) {
-            HeavyAttackIndex = 0;
-        }
-        return true;
-    }
-    else {
-        FString strMessage = FString(TEXT("Attack Montage Not Valid"));
-        UKismetSystemLibrary::PrintString(GetWorld(), *strMessage);
-
-        return false;
-    }
-    return false;
-}
-
-void APlayerCharacter::ResetHeavyAttackVariables()
-{
-    HeavyAttackIndex = 0;
-    HeavyAttackSaved = false;
-
-}
 
 void APlayerCharacter::PlayerDamaged()
 {
@@ -357,28 +211,7 @@ void APlayerCharacter::PlayerDamaged()
     }
 
  //   UE_LOG(LogTemp, Warning, TEXT("Player HP : %d"), currentHP);
-
-
-
-}
-
-
-void APlayerCharacter::LeftAttack(const FInputActionValue& InputValue)
-{
-    UE_LOG(LogTemp, Warning, TEXT("LeftAttack"));
-
-    PerformLightAttack(LightAttackIndex);
-
-}
-
-void APlayerCharacter::RightAttack(const FInputActionValue& InputValue)
-{
-    UE_LOG(LogTemp, Warning, TEXT("RightAttack"));
-
-    PerformHeavyAttack(HeavyAttackIndex);
-
-}
-
+ }
 
 //플레이어 죽는 함수 
 void APlayerCharacter::PlayerDie()
