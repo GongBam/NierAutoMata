@@ -287,7 +287,6 @@ void ABossCharacter::Rolling(float deltaSeconds)
 	FRotator calcRot = FMath::Lerp(currentRot, targetRot, deltaSeconds * rotSpeed);
 	SetActorRotation(calcRot);
 
-
 	if(currentTime > 0.7f)
 		{	
 			// 플레이어가 공격범위 안에 있다면 + 공격당하지 않았다면 

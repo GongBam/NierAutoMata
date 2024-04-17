@@ -14,13 +14,13 @@
 #include "TEST2BAnimInstance.h"
 
 APlayerCharacter::APlayerCharacter()
-{
+{   
     PrimaryActorTick.bCanEverTick = true;
 
     //플레이어 시야 
     SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm"));
     SpringArm->SetupAttachment(RootComponent);
-    SpringArm->TargetArmLength = 600.0f;
+    SpringArm->TargetArmLength = 300.0f;
     SpringArm->bUsePawnControlRotation = true;
 
     Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
@@ -58,7 +58,6 @@ APlayerCharacter::APlayerCharacter()
     JumpMaxCount = 2;
 }
 
-
 void APlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
@@ -66,7 +65,6 @@ void APlayerCharacter::BeginPlay()
 
      //게임 시작시 currentHP > maxHP 로 초기화
     currentHP = maxHP;
-
 
     //플레이어 인풋맵핑 생성
     pc = GetController<APlayerController>();
@@ -131,7 +129,6 @@ void APlayerCharacter::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActo
     }
 }
 
-
 void APlayerCharacter::PlayerMove(const FInputActionValue& Value)
 {
     FVector2D inputValue = Value.Get<FVector2D>();
@@ -154,7 +151,6 @@ void APlayerCharacter::PlayerMove(const FInputActionValue& Value)
     }
   
 }
-
 
 void APlayerCharacter::Look(const FInputActionValue& Value)
 {

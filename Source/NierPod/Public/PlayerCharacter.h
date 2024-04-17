@@ -26,6 +26,7 @@ public:
 	class UCameraComponent* Camera;
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* SpringArm;
+
 	UPROPERTY(EditAnywhere, Category = "MySettings|Inputs")
 	class UInputMappingContext* imc_KeyMap;
 	UPROPERTY(EditAnywhere, Category = "MySettings|Inputs")
@@ -42,8 +43,10 @@ public:
 
 	UFUNCTION()
 	void PlayerDamaged();
+
 	UPROPERTY(EditAnywhere, Category = "PlayerSettings")
 	class UWidgetComponent* playerwidgetComp;
+
 	UPROPERTY(EditAnywhere, Category = "PlayerSettings")
 	int32 currentHP;
 	UPROPERTY(EditAnywhere, Category = "PlayerSettings")
@@ -63,24 +66,26 @@ public:
 
 	class ABossCharacter* bossCharacter;
 	
-
 protected:
 
 	FVector moveDirection;
 
 
 	//임시로 보스 데미지주는 함수
+	UFUNCTION()
 	void DAMAGING(const FInputActionValue& Value);
-
+	UFUNCTION()
 	void Look(const FInputActionValue& Value);
+	UFUNCTION()
 	void PlayerMove(const FInputActionValue& Value);
+	UFUNCTION()
 	void PlayerJump(const FInputActionValue& Value);
+	UFUNCTION()
 	void PlayerJumpEnd(const FInputActionValue& Value);
+	UFUNCTION()
 	void Shot(const FInputActionValue& Value);
 
-	
 	void PlayerDie();
-
 
 	UPROPERTY(EditAnywhere, Category = "PlayerSettings")
 	class UBoxComponent* boxComp;
