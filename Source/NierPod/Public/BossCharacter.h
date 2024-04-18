@@ -133,6 +133,7 @@ private:
 	bool bIsAttacked = false;
 	bool shieldSpawn = false;
 	bool bPhaseChanged = false;
+	bool bShootingended = false;
 
 
 	void CheckDistance();

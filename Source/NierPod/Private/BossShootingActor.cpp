@@ -35,7 +35,6 @@ void ABossShootingActor::BeginPlay()
 	{
 		FVector lookDir = player->GetActorLocation() - GetActorLocation();
 		moveDir = lookDir.GetSafeNormal();
-		UE_LOG(LogTemp, Warning, TEXT("moveDir.X : %f, moveDir.Y : %f, moveDir.Z : %F"), moveDir.X, moveDir.Y, moveDir.Z);
 	}
 }
 

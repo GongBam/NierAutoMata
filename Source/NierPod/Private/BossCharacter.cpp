@@ -154,7 +154,7 @@ void ABossCharacter::CheckDistance()
 
 void ABossCharacter::Idle(float DeltaSeconds)
 {	
-	//보스 피가 900 이하라면 MOVE 상태로 전환 - 페이즈 시작
+	//보스 피가 900 이하라면 MOVE 상태로 전환 - 첫 페이즈 시작
 	if (currentHP <= 900.0f)
 	{
 		bossState = EBossState::MOVE;
@@ -165,10 +165,9 @@ void ABossCharacter::AttackReady()
 {	// 특정 STATE 와 중복되지 않게 막기 
 	if (bossState == EBossState::BLOCK || bossState == EBossState::BLOCKATTACK) {return;}
 
-	UE_LOG(LogTemp, Warning, TEXT("READY TO ATTACK PLAYER"));
 	//플레이어 거리가 attackDistance 보다 작으면
 	if (FVector::Distance(GetActorLocation(), target->GetActorLocation()) < attackDistance)
-		{	//랜덤 발차기 - 기본공격 
+		{	//랜덤 발차기 
 			int32 num = FMath::RandRange(1,3);
 			if(num == 1)
 			{
@@ -178,6 +177,7 @@ void ABossCharacter::AttackReady()
 			{
 				bossState = EBossState::ATTACK2;
 			}
+			//점프공격은 보스체력 500 이하에서부터 시작 
 			else if(num == 3 && bPhaseChanged == true)
 			{
 				bossState = EBossState::JUMPATTACK;
@@ -188,7 +188,7 @@ void ABossCharacter::AttackReady()
 		CheckDistance();
 	}
 }
-
+//일반공격1
 void ABossCharacter::Attack()
 {
 	if (bossState == EBossState::BLOCK) {return;}
@@ -196,15 +196,15 @@ void ABossCharacter::Attack()
 	//플레이어 거리가 공격범위 안에 있으면 공격 후 딜레이 
 	if (FVector::Distance(GetActorLocation(), target->GetActorLocation()) < attackDistance + 10.0f)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Boss Kick 1!"));
 		bossState = EBossState::ATTACKDELAY;
 	}
 	else
 	{
+		//플레이어와의 거리가 공격가능 범위보다 멀다면 거리계산해서 MOVE 혹은 ROLLING>MOVE 
 		CheckDistance();
 	}
 }
-
+//일반공격2
 void ABossCharacter::Attack2()
 {
 	if (bossState == EBossState::BLOCK) {return;}
@@ -212,15 +212,14 @@ void ABossCharacter::Attack2()
 	//플레이어 거리가 공격범위 안에 있으면 공격 후 딜레이 
 	if (FVector::Distance(GetActorLocation(), target->GetActorLocation()) < attackDistance + 10.0f)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Boss Kick 2!"))
 		bossState = EBossState::ATTACKDELAY;
 	}
 	else
-	{
+	{	//플레이어와의 거리가 공격가능 범위보다 멀다면 거리계산해서 MOVE 혹은 ROLLING>MOVE 
 		CheckDistance();
 	}
 }
-
+//보스체력 500이하부터 점프공격 시작 
 void ABossCharacter::JumpAttack()
 {
 	if (bossState == EBossState::BLOCK) { return;}
@@ -228,11 +227,10 @@ void ABossCharacter::JumpAttack()
 	//플레이어 거리가 공격범위 안에 있으면 공격 후 딜레이 
 	if (FVector::Distance(GetActorLocation(), target->GetActorLocation()) < attackDistance + 10.0f)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Boss Jump Kick !"));
 		bossState = EBossState::ATTACKDELAY;
 	}
 	else
-	{
+	{	//플레이어와의 거리가 공격가능 범위보다 멀다면 거리계산해서 MOVE 혹은 ROLLING>MOVE 
 		CheckDistance();
 	}
 }
@@ -261,16 +259,17 @@ void ABossCharacter::MoveToTarget(float deltaSeconds)
 		FRotator targetRot = targetDir.ToOrientationRotator();
 		FRotator calcRot = FMath::Lerp(currentRot, targetRot, deltaSeconds * rotSpeed);
 		SetActorRotation(calcRot);
-
+		
+		//Move 중 일정 시간이 지나면 방어상태로 변경
 		currentTime += deltaSeconds;
-		if(currentTime > 5.0f)
+		if(currentTime > 4.0f)
 		{	
 			currentTime = 0;
 			bossState = EBossState::BLOCK;
 		}
 	}
 	else if (targetDir.Length() > rollingDistance)
-	{
+	{	//플레이어가 더 먼 범위에 있다면 앞구르기 실행 
 		bossState = EBossState::ROLLING;
 	}
 }
@@ -298,9 +297,9 @@ void ABossCharacter::Rolling(float deltaSeconds)
 
 	if(currentTime > 0.7f)
 		{	
-			// 플레이어가 공격범위 안에 있다면 + 공격당하지 않았다면 
+			// 플레이어가 공격범위 안에 있다면 + 공격당하지 않았다면 > 어택준비로 전환
 			if (targetDir.Length() <= attackDistance && bIsAttacked == false)
-			{	// 어택준비로 전환
+			{
 				currentTime = 0;
 				bossState = EBossState::ATTACKREADY;
 			}
@@ -315,7 +314,6 @@ void ABossCharacter::Rolling(float deltaSeconds)
  //ATTACK 후 잠시 Delay
 void ABossCharacter::AttackDelay(float deltaSeconds)
 {	
-
 	currentTime += deltaSeconds;
 	if (currentTime > attackDelayTime && bIsAttacked == false)
 	{	//다음 공격 준비 
@@ -323,38 +321,39 @@ void ABossCharacter::AttackDelay(float deltaSeconds)
 		bossState = EBossState::ATTACKREADY;
 	}
 	else
-	{
+	{	//플레이어와의 거리가 공격가능 범위보다 멀다면 거리계산해서 MOVE 혹은 ROLLING>MOVE 
 		CheckDistance();
 	}
 }
-
+//방어 
 void ABossCharacter::Blocking(float deltaSeconds)
-{
+{	//쉴드가 생성된 상황이 아니라면 
 	if (shieldSpawn == false)
 	{
-
+		//쉴드 연속으로 생성하지 않도록, 쉴드 생성 후 shieldSpawn = ture 체크 
 		shieldSpawn = true;
 
 		//보스 피가 800 이하로 깎였을 때 부터 방어 시작
-			//제자리에서 쉴드 생성
+		//제자리에서 쉴드 생성
 		GetWorld()->SpawnActor<AShield>(shield, GetActorLocation(), GetActorRotation());
 		SetActorLocation(GetActorLocation());
 	}	
-		//1,5초 뒤 쉴드 사라지고 BLOCKATTACK 
+		//1.5초 뒤 쉴드 사라지고 BLOCKATTACK 
 		currentTime += deltaSeconds;
 		if (currentTime > 1.5f)
 			{	
 				currentTime = 0;
 				bossState = EBossState::BLOCKATTACK;
+				//쉴드 생성된 상황 아님으로 다시 설정 
 				shieldSpawn = false;
 			}
 }
-
+//방어 후 바로 방어공격 
 void ABossCharacter::BlocKAttack(float deltaSeconds)
-{
+{	//방어공격 애니메이션 실행시간 맞추기 위한 시간재기 
 	currentTime += deltaSeconds;
 	if(currentTime > 1.0f)
-		{	
+		{	//끝나면 상태변환 
 			currentTime = 0;
 			bossState = EBossState::ATTACKDELAY;
 		}
@@ -369,22 +368,27 @@ void ABossCharacter::ShootingAttack(float deltaSeconds)
 	
 		if (shootingLoc != nullptr)
 		{
+		//빛공격 활성화
 		shootingLoc->bShoting=true;
 		}
 	
-		// 6초 뒤 슈팅 끝 + 땅 아래로 내려와서(teleport2 위치) 다시 MOVE 
+		// 6초 뒤 슈팅 끝 + 땅 아래로 내려와서(teleport2 위치) 다시 MOVE상태로 전환 
 		currentTime+=deltaSeconds;
 		if (currentTime > shootingTime)
-		{
+		{	
+			//빛공격 비활성화
 			shootingLoc->bShoting=false;
+
+			//땅 아래로 돌아갈 위치용 액터 찾기
 			for (TActorIterator<ABossReturnLocationActor> iters(GetWorld()); iters; ++iters)
-			{
+			{	
 				returnLoc = *iters;
 			}
 			if (returnLoc != nullptr)
-			{
+			{	//텔레포트 
 				SetActorLocation(returnLoc->GetActorLocation());
-				bossState = EBossState::MOVE;
+				// 다시 플레이어와의 거리 계산하며 MOVE 혹은 ROLLING>MOVE 판단
+				CheckDistance();
 			}
 		}
 	}
@@ -392,8 +396,9 @@ void ABossCharacter::ShootingAttack(float deltaSeconds)
 
 void ABossCharacter::DamageProcess(float deltaSeconds)
 {	
+	//페이즈 전환과정 중에는 데미지 입지 않게 설정 
 	if(bPhaseChanging == true){return;}
-	bIsAttacked = false;
+	bIsAttacked = true;
 
 		currentTime += deltaSeconds;
 		if (currentTime > 0.5f)
@@ -411,30 +416,36 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 				//피격모션 후 플레이어 쫓아감 
 				bossState = EBossState::MOVE;
 			}
-		}
-			 if (currentHP <= 500 && currentHP >= 490)
-			{
-				bPhaseChanged = true;
-				bossState = EBossState::PHASECHANGE;
-				PlayAnimMontage(phaseChaingingMontage);
-			}
+			 else if (currentHP < 490)
+			 {
+				//피격모션 후 플레이어 쫓아감
+				bossState = EBossState::MOVE;
+			 }
+		}	
+	//보스체력 500-490 사이가 되면 특수페이즈 진입 
+	 if (currentHP <= 500 && currentHP >= 490 && bShootingended == false)
+	{
+		bPhaseChanged = true;
+		bossState = EBossState::PHASECHANGE;
+	}
 	
 }
-
+//페이즈 모션 + 텔레포트 
 void ABossCharacter::Phasing(float deltaSeconds)
 {	
 	PlayAnimMontage(phaseChaingingMontage);
-
+	bShootingended = true;
+	//텔레포트할 위치용 액터를 찾음 
 	for (TActorIterator<ABossTeleportLocationActor> iter(GetWorld()); iter; ++iter)
 	{
 		teleportLoc = *iter;
 	
 		if (teleportLoc != nullptr)
-		{
+		{	// 텔레포트 
 			SetActorLocation(teleportLoc->GetActorLocation());
 			currentTime += deltaSeconds;
 			if (currentTime > 2.0f)
-			{
+			{	//2초 뒤 슈팅페이즈 시작 
 				bossState = EBossState::SHOOTATTACK;
 			}
 	}
@@ -452,26 +463,27 @@ void ABossCharacter::BoxCollisionReset()
 	rightFootCollision->SetRelativeScale3D(FVector(0.2f));
 	leftFootCollision->SetRelativeScale3D(FVector(0.2f));
 }
+//페이즈 진입과정 > 데미지 적용되지 않도록 설정
 void ABossCharacter::PhaseChangeStart()
 {
 	bPhaseChanging = true;
 }
+//페이즈 진입과정 끝나면 데미지 다시 적용 
 void ABossCharacter::PhaseChangeEnd()
 {
 	bPhaseChanging = false;
 }
 //보스 데미지받는 함수
 void ABossCharacter::OnDamaged(int32 dmg)
-{
+{	//보스 텔레포트+슈팅 하는 페이즈 '돌입과정' 에서는 데미지 적용 X
 	if (bPhaseChanging == true) {return;}
-	//보스가 공격중 / 방어중 일 땐 데미지 적용 X 
+	//보스가 공격중 / 방어중 / 페이즈 전환중 일 땐 데미지 적용 X 
 	if (bossState == EBossState::ATTACK || bossState == EBossState::ATTACK2
 		|| bossState == EBossState::JUMPATTACK || bossState == EBossState::BLOCK 
-		|| bossState == EBossState::BLOCKATTACK){return;}
+		|| bossState == EBossState::BLOCKATTACK || bossState == EBossState::PHASECHANGE){return;}
 
 	//공격 받음 true 체크 
-	bIsAttacked = true;
-
+	bIsAttacked = false;
 	//HP값이 0 ~ maxHP 값 사이에만 있을 수 있게 설정
 	currentHP = FMath::Clamp(currentHP - dmg, 0, maxHP);
 	if (bossUI != nullptr)
