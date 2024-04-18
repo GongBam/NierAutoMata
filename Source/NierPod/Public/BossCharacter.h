@@ -106,11 +106,10 @@ public:
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
 	class UWidgetComponent* bosswidgetComp;
 
-	UPROPERTY(EditAnywhere, Category = "BossSettings")
-	TSubclassOf<class ABossTeleportLocationActor> teleport1;
+	class ABossTeleportLocationActor* teleportLoc;
+	class ABossReturnLocationActor* returnLoc;
+	class AShootingStartLocationActor* shootingLoc;
 
-	UPROPERTY(EditAnywhere, Category = "BossSettings")
-	TSubclassOf<class ABossTeleportLocationActor> teleport2;
 
 private:
 

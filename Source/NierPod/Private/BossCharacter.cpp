@@ -12,6 +12,7 @@
 #include "Components/WidgetComponent.h"
 #include "BossTeleportLocationActor.h"
 #include "ShootingStartLocationActor.h"
+#include "BossReturnLocationActor.h"
 
 ABossCharacter::ABossCharacter()
 {
@@ -362,25 +363,33 @@ void ABossCharacter::BlocKAttack(float deltaSeconds)
 void ABossCharacter::ShootingAttack(float deltaSeconds)
 {	
 	// teleport1 위치로 가서 슈팅 시작 
-	AShootingStartLocationActor* Shotlocation = Cast<AShootingStartLocationActor>(GetWorld());
-	if (Shotlocation != nullptr)
+	for (TActorIterator<AShootingStartLocationActor> iter(GetWorld()); iter; ++iter)
 	{
+		shootingLoc = *iter;
+	
+		if (shootingLoc != nullptr)
+		{
 		UE_LOG(LogTemp, Warning, TEXT("1111111111111111111111111111111"));
 
-		Shotlocation->bShoting=true;
-	}
-	// 6초 뒤 슈팅 끝 + 땅 아래로 내려와서(teleport2 위치) 다시 MOVE 
-	currentTime+=deltaSeconds;
-	if (currentTime > shootingTime)
-	{
-		Shotlocation->bShoting=false;
-		ABossTeleportLocationActor* teleport = Cast<ABossTeleportLocationActor>(teleport2);
-		if (teleport != nullptr)
+		shootingLoc->bShoting=true;
+		}
+	
+		// 6초 뒤 슈팅 끝 + 땅 아래로 내려와서(teleport2 위치) 다시 MOVE 
+		currentTime+=deltaSeconds;
+		if (currentTime > shootingTime)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("2222222222222222222222222222222"));
+			shootingLoc->bShoting=false;
+			for (TActorIterator<ABossReturnLocationActor> iters(GetWorld()); iters; ++iters)
+			{
+				returnLoc = *iters;
+			}
+			if (returnLoc != nullptr)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("2222222222222222222222222222222"));
 
-			SetActorLocation(teleport->GetActorLocation());
-			bossState = EBossState::MOVE;
+				SetActorLocation(returnLoc->GetActorLocation());
+				bossState = EBossState::MOVE;
+			}
 		}
 	}
 }
@@ -420,19 +429,22 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 
 void ABossCharacter::Phasing(float deltaSeconds)
 {	
-	if (bossState == EBossState::PHASECHANGE) {return;}
 	PlayAnimMontage(phaseChaingingMontage);
-	UE_LOG(LogTemp, Warning, TEXT("000000000000000000000000000"));
 
-	ABossTeleportLocationActor* teleport = Cast<ABossTeleportLocationActor>(teleport1);
-	if (teleport != nullptr)
+	for (TActorIterator<ABossTeleportLocationActor> iter(GetWorld()); iter; ++iter)
 	{
-		SetActorLocation(teleport->GetActorLocation());
+		teleportLoc = *iter;
+	
+		if (teleportLoc != nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("000000000000000000000000000"));
+			SetActorLocation(teleportLoc->GetActorLocation());
+			currentTime += deltaSeconds;
+			if (currentTime > 2.0f)
+			{
+				bossState = EBossState::SHOOTATTACK;
+			}
 	}
-	currentTime+=deltaSeconds;
-	if (currentTime > 2.0f)
-	{
-		bossState = EBossState::SHOOTATTACK;
 	}
 }
 
@@ -456,10 +468,6 @@ void ABossCharacter::PhaseChangeEnd()
 {
 	UE_LOG(LogTemp, Warning, TEXT("PE"));
 	bPhaseChanging = false;
-	FTimerHandle phaseTimer;
-	GetWorldTimerManager().SetTimer(phaseTimer, FTimerDelegate::CreateLambda([&]() {
-		bossState = EBossState::MOVE;
-		}), 1.0f, false);
 }
 //보스 데미지받는 함수
 void ABossCharacter::OnDamaged(int32 dmg)

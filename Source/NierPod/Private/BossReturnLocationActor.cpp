@@ -1,9 +1,9 @@
 
 
-#include "BossTeleportLocationActor.h"
+#include "BossReturnLocationActor.h"
 #include "Components/BoxComponent.h"
 
-ABossTeleportLocationActor::ABossTeleportLocationActor()
+ABossReturnLocationActor::ABossReturnLocationActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -11,13 +11,13 @@ ABossTeleportLocationActor::ABossTeleportLocationActor()
 	SetRootComponent(boxComp);
 }
 
-void ABossTeleportLocationActor::BeginPlay()
+void ABossReturnLocationActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
-void ABossTeleportLocationActor::Tick(float DeltaTime)
+void ABossReturnLocationActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 

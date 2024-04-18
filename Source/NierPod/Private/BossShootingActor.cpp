@@ -34,16 +34,13 @@ void ABossShootingActor::BeginPlay()
 	{
 		FVector lookDir = player->GetActorLocation() - GetActorLocation();
 		moveDir = lookDir.GetSafeNormal();
-
-		FRotator newRot = UKismetMathLibrary::MakeRotFromZX(GetActorUpVector(), moveDir);
-		SetActorRotation(newRot);
 	}
 }
 
 void ABossShootingActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	SetLifeSpan(3.0f);
 	//플레이어 위치가 있던 쪽으로 감
 	SetActorLocation(GetActorLocation() + moveDir * moveSpeed * DeltaTime);
 }
@@ -55,6 +52,7 @@ void ABossShootingActor::OnOverlapPlayer(UPrimitiveComponent* OverlappedComponen
 	if(player != nullptr)
 	{
 		player->PlayerDamaged();
+		Destroy();
 	}
 }
 
