@@ -55,7 +55,7 @@ public:
 
 
 	UFUNCTION()
-	void PlayerDamaged();
+	void PlayerDamaged(int32 dmg);
 
 	UPROPERTY(EditAnywhere, Category = "PlayerSettings")
 	class UWidgetComponent* playerwidgetComp;

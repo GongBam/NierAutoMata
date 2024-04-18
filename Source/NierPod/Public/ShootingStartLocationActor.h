@@ -27,7 +27,7 @@ public:
 	class UArrowComponent* arrowComp;
 
 	UPROPERTY(EditAnywhere, Category="BossSettings")
-	float delayTime = 0.7f;
+	float delayTime = 0.3f;
 
 	UPROPERTY(EditAnywhere, Category="BossSettings")
 	TSubclassOf<class ABossShootingActor> shooting_bp;

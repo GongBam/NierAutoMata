@@ -258,9 +258,9 @@ void APlayerCharacter::DAMAGING(const FInputActionValue& Value)
     }
 }
 
-void APlayerCharacter::PlayerDamaged()
+void APlayerCharacter::PlayerDamaged(int32 dmg)
 {
-    currentHP = FMath::Clamp(currentHP - 10, 0, maxHP);
+    currentHP = FMath::Clamp(currentHP - dmg, 0, maxHP);
     //맞았을 때 (체력이 아직 0보다 크면)
         if(playerUI != nullptr)
         {

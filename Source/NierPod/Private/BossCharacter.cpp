@@ -369,8 +369,6 @@ void ABossCharacter::ShootingAttack(float deltaSeconds)
 	
 		if (shootingLoc != nullptr)
 		{
-		UE_LOG(LogTemp, Warning, TEXT("1111111111111111111111111111111"));
-
 		shootingLoc->bShoting=true;
 		}
 	
@@ -385,8 +383,6 @@ void ABossCharacter::ShootingAttack(float deltaSeconds)
 			}
 			if (returnLoc != nullptr)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("2222222222222222222222222222222"));
-
 				SetActorLocation(returnLoc->GetActorLocation());
 				bossState = EBossState::MOVE;
 			}
@@ -418,7 +414,6 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 		}
 			 if (currentHP <= 500 && currentHP >= 490)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("PhaseChanged"));
 				bPhaseChanged = true;
 				bossState = EBossState::PHASECHANGE;
 				PlayAnimMontage(phaseChaingingMontage);
@@ -436,7 +431,6 @@ void ABossCharacter::Phasing(float deltaSeconds)
 	
 		if (teleportLoc != nullptr)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("000000000000000000000000000"));
 			SetActorLocation(teleportLoc->GetActorLocation());
 			currentTime += deltaSeconds;
 			if (currentTime > 2.0f)
@@ -460,12 +454,10 @@ void ABossCharacter::BoxCollisionReset()
 }
 void ABossCharacter::PhaseChangeStart()
 {
-	UE_LOG(LogTemp, Warning, TEXT("PS"));
 	bPhaseChanging = true;
 }
 void ABossCharacter::PhaseChangeEnd()
 {
-	UE_LOG(LogTemp, Warning, TEXT("PE"));
 	bPhaseChanging = false;
 }
 //보스 데미지받는 함수
@@ -510,7 +502,7 @@ void ABossCharacter::OnDealDamageOverlapBegin(class UPrimitiveComponent* Overlap
 	APlayerCharacter* player = Cast<APlayerCharacter>(OtherActor);
 	if (player != nullptr)
 	{	
-		player->PlayerDamaged();
+		player->PlayerDamaged(damage);
 	}
 }
 

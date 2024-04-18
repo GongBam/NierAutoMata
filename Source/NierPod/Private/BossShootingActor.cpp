@@ -15,6 +15,7 @@ ABossShootingActor::ABossShootingActor()
 	SetRootComponent(sphereComp);
 	sphereComp -> SetCollisionProfileName(FName("BossShooting"));
 	sphereComp -> SetGenerateOverlapEvents(true);
+	sphereComp->SetWorldScale3D(FVector(2.5f));
 
 	meshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
 	meshComp -> SetupAttachment(sphereComp);
@@ -53,7 +54,7 @@ void ABossShootingActor::OnOverlapPlayer(UPrimitiveComponent* OverlappedComponen
 	APlayerCharacter* player = Cast<APlayerCharacter>(OtherActor);
 	if(player != nullptr)
 	{
-		player->PlayerDamaged();
+		player->PlayerDamaged(damage);
 		Destroy();
 	}
 }

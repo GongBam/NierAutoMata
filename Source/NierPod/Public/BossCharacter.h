@@ -63,6 +63,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
 	float attackDelayTime = 2.0f;
 
+	UPROPERTY(EditAnywhere, Category = "BossSettings")
+	int32 damage = 20;
+
 	UFUNCTION(BlueprintCallable)
 	void BoxCollisionExtending();
 

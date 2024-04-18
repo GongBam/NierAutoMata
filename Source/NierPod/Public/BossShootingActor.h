@@ -26,7 +26,10 @@ public:
 	class UStaticMeshComponent* meshComp;
 
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
-	float moveSpeed = 1000.0f;
+	float moveSpeed = 2500.0f;
+
+	UPROPERTY(EditAnywhere, Category = "BossSettings")
+	int32 damage = 50;
 
 private:
 	FVector moveDir;
