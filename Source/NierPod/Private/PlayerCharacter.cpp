@@ -117,6 +117,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
         enhancedInputComponent->BindAction(ia_shot, ETriggerEvent::Triggered, this, &APlayerCharacter::Shot);
         enhancedInputComponent->BindAction(ia_look, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
         enhancedInputComponent->BindAction(ia_damaging, ETriggerEvent::Started, this, &APlayerCharacter::DAMAGING);
+        enhancedInputComponent->BindAction(ia_LeftAttack, ETriggerEvent::Started, this, &APlayerCharacter::LeftAttack);
+        enhancedInputComponent->BindAction(ia_RightAttack, ETriggerEvent::Started, this, &APlayerCharacter::RightAttack);
     }
     
 }
@@ -126,7 +128,8 @@ void APlayerCharacter::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActo
     ABossCharacter* boss = Cast<ABossCharacter>(OtherActor);
     if (boss != nullptr)
     {
-
+        boss->OnDamaged(damage);
+        UE_LOG(LogTemp, Warning, TEXT("%d"), damage);
     }
 }
 
@@ -150,7 +153,7 @@ void APlayerCharacter::PlayerMove(const FInputActionValue& Value)
             playerAnim->moveDirection = moveDirection;
         }
     }
-  
+    DrawSword=true;
 }
 
 void APlayerCharacter::Look(const FInputActionValue& Value)
@@ -189,6 +192,46 @@ void APlayerCharacter::Shot(const FInputActionValue& Value)
             UE_LOG(LogTemp, Warning, TEXT("null"));
         }
     }
+}
+
+void APlayerCharacter::LeftAttack(const FInputActionValue& Value)
+{
+  
+    if(DrawSword)
+    {
+        PlayAnimMontage(Draw_montage,1.5f);
+        DrawSword = false;
+    }
+    else{
+        int32 left = FMath::RandRange(1,3);
+        FString sectionName = FString("Left")+FString::FromInt(left);
+        PlayAnimMontage(Left_montages,1.5f,FName(sectionName));
+   
+        UE_LOG(LogTemp, Warning, TEXT("%d"), left);
+
+        damage = 10;
+    }
+}
+
+void APlayerCharacter::RightAttack(const FInputActionValue& Value)
+{
+    if (DrawSword)
+    {
+        PlayAnimMontage(Draw_montage, 1.5f);
+        DrawSword = false;
+    }
+    else
+    {
+        int32 right = FMath::RandRange(1,3);
+        FString sectionName = FString("Right") + FString::FromInt(right);
+        PlayAnimMontage(Right_montages, 1.5f, FName(sectionName));
+        damage = 20;
+    }
+}
+
+void APlayerCharacter::EndAttack()
+{
+
 }
 
 // 임시로 보스 데미지주는 함수 

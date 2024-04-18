@@ -4,6 +4,7 @@
 #include "TEST2BAnimInstance.h"
 #include "PlayerCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "BossCharacter.h"
 
 void UTEST2BAnimInstance::NativeInitializeAnimation()
 {

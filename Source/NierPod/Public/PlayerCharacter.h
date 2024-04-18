@@ -39,6 +39,19 @@ public:
 	class UInputAction* ia_look;
 	UPROPERTY(EditAnywhere, category = "MySettings|Inputs")
 	class UInputAction* ia_damaging;
+	UPROPERTY(EditAnywhere, category = "MySettings|Inputs")
+	class UInputAction* ia_LeftAttack;
+	UPROPERTY(EditAnywhere, category = "MySettings|Inputs")
+	class UInputAction* ia_RightAttack;
+	UPROPERTY(EditAnywhere, Category= "MySettings|Inputs")
+	class UAnimMontage* Left_montages;
+	UPROPERTY(EditAnywhere, Category = "MySettings|Inputs")
+	class UAnimMontage* Right_montages;
+	UPROPERTY(EditAnywhere, Category = "MySettings|Inputs")
+	class UAnimMontage* Draw_montage;
+
+
+
 
 
 	UFUNCTION()
@@ -51,11 +64,9 @@ public:
 	int32 currentHP;
 	UPROPERTY(EditAnywhere, Category = "PlayerSettings")
 	int32 maxHP = 1000;
-	//플레이어 체력
 	UPROPERTY(EditAnywhere, Category = "PlayerSettings")
 	float playerHealth = 1000.0f;
 
-	//무기 콜리전 오버랩시 데미지 
 	UFUNCTION()
 	void OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
@@ -84,17 +95,28 @@ protected:
 	void PlayerJumpEnd(const FInputActionValue& Value);
 	UFUNCTION()
 	void Shot(const FInputActionValue& Value);
+	UFUNCTION()
+	void LeftAttack(const FInputActionValue& Value);
+	UFUNCTION()
+	void RightAttack(const FInputActionValue& Value);
 
+	
+	UFUNCTION()
+	void EndAttack();
+
+
+	UFUNCTION()
 	void PlayerDie();
 
 	UPROPERTY(EditAnywhere, Category = "PlayerSettings")
 	class UBoxComponent* boxComp;
-	UPROPERTY(EditAnywhere, Category = "PlayerSettings")
+	UPROPERTY(EditAnywhere,BlueprintReadWrite ,Category = "PlayerSettings")
 	class UStaticMeshComponent* weaponComp;
 
-	
 	UPROPERTY()
 	class APlayerController* pc;
+	
+	UPROPERTY()
 	class UTEST2BAnimInstance* playerAnim;
 
 	bool canDash = true;
@@ -102,9 +124,9 @@ protected:
 	FVector Velocity;
 	float DashCooldown = 0.2f;
 
-	int32 damage = 10;
+	int32 damage = 0;
 
 	// 이단 점프
 	bool DoubleJump;
-
+	bool DrawSword = true;
 };

@@ -25,6 +25,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
 	bool bAttack = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MySettings")
+	int32 attackNum=1;
+
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
@@ -36,7 +39,5 @@ private:
 	UPROPERTY()
 	class UCharacterMovementComponent* playerMovementComp;
 
-
-	
 
 };
