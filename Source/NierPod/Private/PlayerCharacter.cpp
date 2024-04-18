@@ -198,21 +198,22 @@ void APlayerCharacter::LeftAttack(const FInputActionValue& Value)
 {
     if(DrawSword)
     {
-        PlayAnimMontage(Draw_montage,1.5f);
-        DrawSword = false;
-    }
-    else{
-        FString sectionName = FString("Left")+FString::FromInt(left);
-        PlayAnimMontage(Left_montages,1.5f,FName(sectionName));
-   
+        FString sectionName = FString("Left") + FString::FromInt(left);
+        PlayAnimMontage(Left_montages, 1.5f, FName(sectionName));
+
         UE_LOG(LogTemp, Warning, TEXT("%d"), left);
 
         damage = 10;
-        left=left+1;
-        if(left>3)
+        left = left + 1;
+        if (left > 3)
         {
             left = 1;
         }
+    }
+    else
+    {
+        PlayAnimMontage(Draw_montage, 1.5f);
+        DrawSword = true;
     }
 }
 
@@ -220,25 +221,23 @@ void APlayerCharacter::RightAttack(const FInputActionValue& Value)
 {
     if (DrawSword)
     {
-        PlayAnimMontage(Draw_montage, 1.5f);
-        DrawSword = false;
-    }
-    else
-    {
         FString sectionName = FString("Right") + FString::FromInt(right);
         PlayAnimMontage(Right_montages, 1.5f, FName(sectionName));
         damage = 20;
         UE_LOG(LogTemp, Warning, TEXT("%d"), right);
-        right=right+1;
+        right = right + 1;
 
-        if(right>=3)
+        if (right >= 3)
         {
             right = 1;
         }
-    
+    }
+    else
+    {
+        PlayAnimMontage(Draw_montage, 1.5f);
+        DrawSword = true;
     }
 }
-
 void APlayerCharacter::EndAttack()
 {
 

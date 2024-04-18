@@ -131,5 +131,5 @@ protected:
 
 	// 이단 점프
 	bool DoubleJump;
-	bool DrawSword = true;
+	bool DrawSword = false;
 };
