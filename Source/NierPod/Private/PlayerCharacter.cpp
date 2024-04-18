@@ -26,14 +26,15 @@ APlayerCharacter::APlayerCharacter()
     Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
     Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
     Camera->bUsePawnControlRotation = true;
+    
+    weaponComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Weapon Mesh Component"));
+    weaponComp -> SetupAttachment(GetMesh(), FName("DrawSocket"));
+    weaponComp -> SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
     boxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("Weapon Box Component"));
-    boxComp -> SetupAttachment(GetMesh(), TEXT("WeaponSocket"));
-    boxComp -> SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-    weaponComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Weapon Mesh Component"));
-    weaponComp -> SetupAttachment(boxComp);
-    weaponComp -> SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    boxComp->SetupAttachment(weaponComp);
+    boxComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+   
 
     playerwidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("Player Health Widget Component"));
 
