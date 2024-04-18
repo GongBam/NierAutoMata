@@ -29,11 +29,12 @@ void ABossShootingActor::BeginPlay()
 	sphereComp -> OnComponentBeginOverlap.AddDynamic(this, &ABossShootingActor::OnOverlapPlayer);
 
 	//플레이어 찾아서 위치값에 맞는 회전값 받음 
-	APlayerCharacter* player = Cast<APlayerCharacter>(GetWorld());
+	APlayerCharacter* player = Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	if (player != nullptr)
 	{
 		FVector lookDir = player->GetActorLocation() - GetActorLocation();
 		moveDir = lookDir.GetSafeNormal();
+		UE_LOG(LogTemp, Warning, TEXT("moveDir.X : %f, moveDir.Y : %f, moveDir.Z : %F"), moveDir.X, moveDir.Y, moveDir.Z);
 	}
 }
 
@@ -43,6 +44,7 @@ void ABossShootingActor::Tick(float DeltaTime)
 	SetLifeSpan(3.0f);
 	//플레이어 위치가 있던 쪽으로 감
 	SetActorLocation(GetActorLocation() + moveDir * moveSpeed * DeltaTime);
+
 }
 
 

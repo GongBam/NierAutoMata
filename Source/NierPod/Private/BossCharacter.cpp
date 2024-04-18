@@ -398,15 +398,7 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 {	
 	if(bPhaseChanging == true){return;}
 	bIsAttacked = false;
-	if (currentHP <= 500 && currentHP >= 490)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("PhaseChanged"));
-		bPhaseChanged = true;
-		bossState = EBossState::PHASECHANGE;
-		PlayAnimMontage(phaseChaingingMontage);
-	}
-	else
-	{
+
 		currentTime += deltaSeconds;
 		if (currentTime > 0.5f)
 		{
@@ -414,8 +406,8 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 			//보스 체력이 900 이하가 아니라면 
 			if (currentHP > 900)
 			{
-				//피격모션 후 IDLE 
-				bossState = EBossState::IDLE;
+			//피격모션 후 IDLE 
+			bossState = EBossState::IDLE;
 			}
 			//보스 체력이 900 이하라면 
 			else if (currentHP <= 900 && currentHP >= 500)
@@ -424,7 +416,14 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 				bossState = EBossState::MOVE;
 			}
 		}
-	}
+			 if (currentHP <= 500 && currentHP >= 490)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("PhaseChanged"));
+				bPhaseChanged = true;
+				bossState = EBossState::PHASECHANGE;
+				PlayAnimMontage(phaseChaingingMontage);
+			}
+	
 }
 
 void ABossCharacter::Phasing(float deltaSeconds)
