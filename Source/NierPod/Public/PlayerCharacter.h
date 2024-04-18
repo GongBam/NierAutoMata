@@ -125,6 +125,9 @@ protected:
 	float DashCooldown = 0.2f;
 
 	int32 damage = 0;
+	int32 left = 1;
+	int32 right = 1;
+
 
 	// 이단 점프
 	bool DoubleJump;
