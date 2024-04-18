@@ -12,6 +12,7 @@
 #include "Components/WidgetComponent.h"
 #include "EngineUtils.h"
 #include "TEST2BAnimInstance.h"
+#include "Shield.h"
 
 APlayerCharacter::APlayerCharacter()
 {   
@@ -256,21 +257,41 @@ void APlayerCharacter::DAMAGING(const FInputActionValue& Value)
       }
     }
 }
-
+//플레이어 데미지 입는 함수 
 void APlayerCharacter::PlayerDamaged(int32 dmg)
-{
+{   
+    //체력깎기 (체력 0~maxHP 범위로 설정)
     currentHP = FMath::Clamp(currentHP - dmg, 0, maxHP);
-    //맞았을 때 (체력이 아직 0보다 크면)
-        if(playerUI != nullptr)
-        {
-            playerUI->SetHealthBar((float)currentHP / (float)maxHP);
-        }
-    if (currentHP > 0)
-    {
+    if(playerUI != nullptr)
+    {   //깎인 체력으로 체력바 UI 갱신 
+       playerUI->SetHealthBar((float)currentHP / (float)maxHP);
     }
     // 맞았을 때 체력이 0이거나 0보다 작아지면
     if (currentHP <= 0)
-    {
+    {   
+        //죽는함수 호출 
+        PlayerDie();
+    }
+}
+//플레이어 데미지 입음 + 뒤로 튕겨지는 함수 
+void APlayerCharacter::PlayerDamagedWithKnockBack(int32 dmg)
+{   
+    //체력깎기 (체력 0~maxHP 범위로 설정)
+    currentHP = FMath::Clamp(currentHP - dmg, 0, maxHP);
+
+    FVector backVac = GetActorForwardVector() * -1.0f;
+    FVector targetLoc = GetActorLocation() + backVac * 100.0f;
+    FVector knockBackLocation = FMath::Lerp(GetActorLocation(), targetLoc, GetWorld()->GetDeltaSeconds() * 2);
+    SetActorLocation(knockBackLocation, true);
+
+    if (playerUI != nullptr)
+    {  //깎인 체력으로 체력바 UI 갱신 
+        playerUI->SetHealthBar((float)currentHP / (float)maxHP);
+    }
+    //맞았을 때 체력이 0이거나 0보다 작아지면 
+    if (currentHP <= 0)
+    {   
+        //죽는함수 호출
         PlayerDie();
     }
 }

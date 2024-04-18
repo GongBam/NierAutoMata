@@ -23,6 +23,19 @@ public:
 	class USphereComponent* sphereComp;
 
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
+	class USphereComponent* sphereComp2;
+
+	UPROPERTY(EditAnywhere, Category = "BossSettings")
 	class UStaticMeshComponent* meshComp;
 
+	UPROPERTY(EditAnywhere, Category = "BossSettings")
+	int32 damage = 50;
+
+	class APlayerCharacter* player;
+
+	UFUNCTION()
+	void ShieldExtending();
+
+	UFUNCTION()
+	void ShieldAttacking(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SewwpResult);
 };

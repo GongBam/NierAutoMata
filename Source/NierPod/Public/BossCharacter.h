@@ -112,15 +112,10 @@ public:
 	class ABossTeleportLocationActor* teleportLoc;
 	class ABossReturnLocationActor* returnLoc;
 	class AShootingStartLocationActor* shootingLoc;
+	class AShield* sh;
 
 
 private:
-
-	FTimerHandle blockTimer;
-	FTimerHandle rollingTimer;
-	FTimerHandle blockingTimer;
-	FTimerHandle blockAttackingTimer;
-	FTimerHandle hitTimer;
 
 	class UBossHealthWidget* bossUI;
 

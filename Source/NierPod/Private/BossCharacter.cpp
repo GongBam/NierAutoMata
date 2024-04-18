@@ -338,25 +338,34 @@ void ABossCharacter::Blocking(float deltaSeconds)
 		GetWorld()->SpawnActor<AShield>(shield, GetActorLocation(), GetActorRotation());
 		SetActorLocation(GetActorLocation());
 	}	
-		//1.5초 뒤 쉴드 사라지고 BLOCKATTACK 
-		currentTime += deltaSeconds;
-		if (currentTime > 1.5f)
-			{	
-				currentTime = 0;
-				bossState = EBossState::BLOCKATTACK;
-				//쉴드 생성된 상황 아님으로 다시 설정 
-				shieldSpawn = false;
-			}
+	//1.3초 뒤 쉴드 사라지고 BLOCKATTACK 
+	currentTime += deltaSeconds;
+	if (currentTime > 1.0f)
+		{	
+			currentTime = 0;
+			bossState = EBossState::BLOCKATTACK;
+			//쉴드 생성된 상황 아님으로 다시 설정 
+			shieldSpawn = false;
+		}
 }
 //방어 후 바로 방어공격 
 void ABossCharacter::BlocKAttack(float deltaSeconds)
 {	//방어공격 애니메이션 실행시간 맞추기 위한 시간재기 
 	currentTime += deltaSeconds;
-	if(currentTime > 1.0f)
+	for (TActorIterator<AShield> it(GetWorld()); it; ++it)
+	{
+		sh = *it;
+		if (sh != nullptr)
+		{
+			sh->ShieldExtending();
+		}
+
+		if (currentTime > 0.8f)
 		{	//끝나면 상태변환 
 			currentTime = 0;
 			bossState = EBossState::ATTACKDELAY;
 		}
+	}
 }
 
 void ABossCharacter::ShootingAttack(float deltaSeconds)
@@ -428,7 +437,6 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 		bPhaseChanged = true;
 		bossState = EBossState::PHASECHANGE;
 	}
-	
 }
 //페이즈 모션 + 텔레포트 
 void ABossCharacter::Phasing(float deltaSeconds)
@@ -528,4 +536,13 @@ void ABossCharacter::Die()
 	rightFootCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	GetCharacterMovement()->DisableMovement();
+
+	//1초 뒤 Destroy
+	// 포드랑 9S(아군AI)에서 널포인트오류 낼 수 있을 것 같아서 일단 주석처리중
+	
+//	FTimerHandle deathTimer;
+//	GetWorldTimerManager().SetTimer(deathTimer, FTimerDelegate::CreateLambda([&](){
+//		Destroy();
+//		}), 1.0f, false);
+
 }

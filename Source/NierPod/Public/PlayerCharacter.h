@@ -53,9 +53,12 @@ public:
 
 
 
-
+	//일반공격 데미지받는 함수
 	UFUNCTION()
 	void PlayerDamaged(int32 dmg);
+	//데미지 받으면서 튕겨지는 함수 
+	UFUNCTION()
+	void PlayerDamagedWithKnockBack(int32 dmg);
 
 	UPROPERTY(EditAnywhere, Category = "PlayerSettings")
 	class UWidgetComponent* playerwidgetComp;
@@ -66,6 +69,8 @@ public:
 	int32 maxHP = 1000;
 	UPROPERTY(EditAnywhere, Category = "PlayerSettings")
 	float playerHealth = 1000.0f;
+	UPROPERTY(EditAnywhere, Category = "PlayerSettings")
+	float knockBackDistance = 1000.0f;
 
 	UFUNCTION()
 	void OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
