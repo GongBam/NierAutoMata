@@ -242,7 +242,7 @@ void ABossCharacter::MoveToTarget(float deltaSeconds)
 	targetDir.Z = 0;
 
 	// 플레이어가 공격범위 안에 있다면 + 공격당하지 않았다면 
-	if (targetDir.Length() <= attackDistance && bIsAttacked == false)
+	if (targetDir.Length() <= attackDistance)
 	{	// 어택준비로 전환
 		
 		bossState = EBossState::ATTACKREADY;
