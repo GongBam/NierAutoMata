@@ -10,6 +10,8 @@
 #include "Shield.h"
 #include "BossHealthWidget.h"
 #include "Components/WidgetComponent.h"
+#include "BossTeleportLocationActor.h"
+#include "ShootingStartLocationActor.h"
 
 ABossCharacter::ABossCharacter()
 {
@@ -113,6 +115,9 @@ void ABossCharacter::Tick(float DeltaTime)
 	case EBossState::BLOCKATTACK:
 		BlocKAttack(DeltaTime);
 		break;
+	case EBossState::SHOOTATTACK:
+		ShootingAttack(DeltaTime);
+		break;
 	case EBossState::DAMAGED:
 		DamageProcess(DeltaTime);
 		break;
@@ -163,7 +168,7 @@ void ABossCharacter::AttackReady()
 	//플레이어 거리가 attackDistance 보다 작으면
 	if (FVector::Distance(GetActorLocation(), target->GetActorLocation()) < attackDistance)
 		{	//랜덤 발차기 - 기본공격 
-			int32 num = FMath::RandRange(1,2);
+			int32 num = FMath::RandRange(1,3);
 			if(num == 1)
 			{
 				bossState = EBossState::ATTACK;
@@ -172,7 +177,7 @@ void ABossCharacter::AttackReady()
 			{
 				bossState = EBossState::ATTACK2;
 			}
-			else if(num == 3)
+			else if(num == 3 && bPhaseChanged == true)
 			{
 				bossState = EBossState::JUMPATTACK;
 			}
@@ -354,12 +359,41 @@ void ABossCharacter::BlocKAttack(float deltaSeconds)
 		}
 }
 
+void ABossCharacter::ShootingAttack(float deltaSeconds)
+{	
+	// teleport1 위치로 가서 슈팅 시작 
+	AShootingStartLocationActor* Shotlocation = Cast<AShootingStartLocationActor>(GetWorld());
+	if (Shotlocation != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("1111111111111111111111111111111"));
+
+		Shotlocation->bShoting=true;
+	}
+	// 6초 뒤 슈팅 끝 + 땅 아래로 내려와서(teleport2 위치) 다시 MOVE 
+	currentTime+=deltaSeconds;
+	if (currentTime > shootingTime)
+	{
+		Shotlocation->bShoting=false;
+		ABossTeleportLocationActor* teleport = Cast<ABossTeleportLocationActor>(teleport2);
+		if (teleport != nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("2222222222222222222222222222222"));
+
+			SetActorLocation(teleport->GetActorLocation());
+			bossState = EBossState::MOVE;
+		}
+	}
+}
+
 void ABossCharacter::DamageProcess(float deltaSeconds)
-{
+{	
+	if(bPhaseChanging == true){return;}
 	bIsAttacked = false;
 	if (currentHP <= 500 && currentHP >= 490)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("PhaseChanged"));
+		bPhaseChanged = true;
+		bossState = EBossState::PHASECHANGE;
 		PlayAnimMontage(phaseChaingingMontage);
 	}
 	else
@@ -386,9 +420,20 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 
 void ABossCharacter::Phasing(float deltaSeconds)
 {	
-	UE_LOG(LogTemp, Warning, TEXT("PASHING"));
 	if (bossState == EBossState::PHASECHANGE) {return;}
 	PlayAnimMontage(phaseChaingingMontage);
+	UE_LOG(LogTemp, Warning, TEXT("000000000000000000000000000"));
+
+	ABossTeleportLocationActor* teleport = Cast<ABossTeleportLocationActor>(teleport1);
+	if (teleport != nullptr)
+	{
+		SetActorLocation(teleport->GetActorLocation());
+	}
+	currentTime+=deltaSeconds;
+	if (currentTime > 2.0f)
+	{
+		bossState = EBossState::SHOOTATTACK;
+	}
 }
 
 void ABossCharacter::BoxCollisionExtending()
@@ -414,7 +459,7 @@ void ABossCharacter::PhaseChangeEnd()
 	FTimerHandle phaseTimer;
 	GetWorldTimerManager().SetTimer(phaseTimer, FTimerDelegate::CreateLambda([&]() {
 		bossState = EBossState::MOVE;
-		}), 2.0f, false);
+		}), 1.0f, false);
 }
 //보스 데미지받는 함수
 void ABossCharacter::OnDamaged(int32 dmg)

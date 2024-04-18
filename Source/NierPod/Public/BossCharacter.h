@@ -15,6 +15,7 @@ enum class EBossState : uint8
 	ATTACK		UMETA(DisplayName = "Attack State"),
 	ATTACK2     UMETA(DisplayName = "Attack2 State"),
 	JUMPATTACK  UMETA(DisplayName = "Jump Attack State"),
+	SHOOTATTACK UMETA(DisplayName = "Sooting Attack State"),
 	ATTACKDELAY UMETA(DisplayName = "Attack Delay State"),
 	BLOCK		UMETA(DisplayName = "Block State"),
 	BLOCKATTACK UMETA(DisplayName = "Block Attack State"),
@@ -53,6 +54,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
 	float rollingDistance = 800.0f;
+
+	UPROPERTY(EditAnywhere, Category = "BossSettings")
+	float shootingTime = 6.0f;
 
 	float rotSpeed = 5.0f;
 
@@ -102,6 +106,12 @@ public:
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
 	class UWidgetComponent* bosswidgetComp;
 
+	UPROPERTY(EditAnywhere, Category = "BossSettings")
+	TSubclassOf<class ABossTeleportLocationActor> teleport1;
+
+	UPROPERTY(EditAnywhere, Category = "BossSettings")
+	TSubclassOf<class ABossTeleportLocationActor> teleport2;
+
 private:
 
 	FTimerHandle blockTimer;
@@ -114,11 +124,13 @@ private:
 
 
 	float currentTime = 0;
+	
 
 	int32 currentHP = 0;
 	FVector hitLocation;
 	bool bIsAttacked = false;
 	bool shieldSpawn = false;
+	bool bPhaseChanged = false;
 
 
 	void CheckDistance();
@@ -135,6 +147,7 @@ private:
 	void AttackDelay(float deltaSeconds);
 	void Blocking(float deltaSeconds);
 	void BlocKAttack(float deltaSeconds);
+	void ShootingAttack(float deltaSeconds);
 	void DamageProcess(float deltaSeconds);
 	void Phasing(float deltaSeconds);
 	void Die();
