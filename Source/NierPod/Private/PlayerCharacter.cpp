@@ -13,6 +13,7 @@
 #include "EngineUtils.h"
 #include "TEST2BAnimInstance.h"
 #include "Shield.h"
+#include "NierGameModeBase.h"
 
 APlayerCharacter::APlayerCharacter()
 {   
@@ -154,7 +155,8 @@ void APlayerCharacter::PlayerMove(const FInputActionValue& Value)
             playerAnim->moveDirection = moveDirection;
         }
     }
-    DrawSword=true;
+    playerAnim->bIsAttack=false;
+
 }
 
 void APlayerCharacter::Look(const FInputActionValue& Value)
@@ -197,6 +199,10 @@ void APlayerCharacter::Shot(const FInputActionValue& Value)
 
 void APlayerCharacter::LeftAttack(const FInputActionValue& Value)
 {
+    if (GetWorldTimerManager().IsTimerActive(AttackTimer))
+    {
+        return;
+    }
     if(DrawSword)
     {
         FString sectionName = FString("Left") + FString::FromInt(left);
@@ -216,10 +222,23 @@ void APlayerCharacter::LeftAttack(const FInputActionValue& Value)
         PlayAnimMontage(Draw_montage, 1.5f);
         DrawSword = true;
     }
+
+    if(playerAnim!=nullptr)
+    {
+        playerAnim->bIsAttack=true;
+
+        GetWorldTimerManager().SetTimer(AttackTimer, this, &APlayerCharacter::EndAttack, 0.5f, false);
+    }
+
 }
 
 void APlayerCharacter::RightAttack(const FInputActionValue& Value)
 {
+    if (GetWorldTimerManager().IsTimerActive(AttackTimer))
+    {
+        return;
+    }
+
     if (DrawSword)
     {
         FString sectionName = FString("Right") + FString::FromInt(right);
@@ -238,9 +257,13 @@ void APlayerCharacter::RightAttack(const FInputActionValue& Value)
         PlayAnimMontage(Draw_montage, 1.5f);
         DrawSword = true;
     }
-}
-void APlayerCharacter::EndAttack()
-{
+    if (playerAnim != nullptr)
+    {
+        playerAnim->bIsAttack = true;
+
+        GetWorldTimerManager().SetTimer(AttackTimer, this, &APlayerCharacter::EndAttack, 0.5f, false);
+    }
+    
 
 }
 
@@ -296,9 +319,18 @@ void APlayerCharacter::PlayerDamagedWithKnockBack(int32 dmg)
     }
 }
 
+void APlayerCharacter::EndAttack()
+{
+	if (playerAnim != nullptr)
+	{
+		playerAnim->bIsAttack = false;
+	}
+}
+
+
 //플레이어 죽는 함수 
 void APlayerCharacter::PlayerDie()
 {
-
-    
+    PlayAnimMontage(Die_montage);
+    GetCharacterMovement()->DisableMovement(); 
 }

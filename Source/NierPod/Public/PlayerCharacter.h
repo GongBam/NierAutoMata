@@ -50,8 +50,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "MySettings|Inputs")
 	class UAnimMontage* Draw_montage;
 
-
-
+	UPROPERTY(EditAnywhere, Category = "MySettings|Inputs")
+	class UAnimMontage* Die_montage;
 
 	//일반공격 데미지받는 함수
 	UFUNCTION()
@@ -72,6 +72,12 @@ public:
 	UPROPERTY(EditAnywhere, Category = "PlayerSettings")
 	float knockBackDistance = 1000.0f;
 
+	UPROPERTY(EditAnywhere, Category = "PlayerSettings")
+	class UBoxComponent* boxComp;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = "PlayerSettings")
+	class UStaticMeshComponent* weaponComp;
+
+
 	UFUNCTION()
 	void OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
@@ -82,9 +88,10 @@ public:
 
 	class ABossCharacter* bossCharacter;
 	
-protected:
+private:
 
 	FVector moveDirection;
+	FTimerHandle AttackTimer;
 
 
 	//임시로 보스 데미지주는 함수
@@ -94,6 +101,7 @@ protected:
 	void Look(const FInputActionValue& Value);
 	UFUNCTION()
 	void PlayerMove(const FInputActionValue& Value);
+
 	UFUNCTION()
 	void PlayerJump(const FInputActionValue& Value);
 	UFUNCTION()
@@ -105,18 +113,16 @@ protected:
 	UFUNCTION()
 	void RightAttack(const FInputActionValue& Value);
 
-	
+
+	UFUNCTION()
+	void PlayerDie();
 	UFUNCTION()
 	void EndAttack();
 
 
-	UFUNCTION()
-	void PlayerDie();
 
-	UPROPERTY(EditAnywhere, Category = "PlayerSettings")
-	class UBoxComponent* boxComp;
-	UPROPERTY(EditAnywhere,BlueprintReadWrite ,Category = "PlayerSettings")
-	class UStaticMeshComponent* weaponComp;
+
+	
 
 	UPROPERTY()
 	class APlayerController* pc;

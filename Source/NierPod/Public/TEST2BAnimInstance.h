@@ -28,6 +28,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MySettings")
 	int32 attackNum=1;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	bool bIsAttack=false;
+	
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
