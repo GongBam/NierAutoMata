@@ -17,7 +17,7 @@ class NIERPOD_API ANierGameModeBase : public AGameModeBase
 
 
 public:
-	virtual void Tick(float DeltaTime) override;
+	
 
 	class APlayerCharacter* player;
 	class AC_BossCharacter* boss;
@@ -25,5 +25,19 @@ public:
 	bool bPlayerDead = false;
 	bool bBossDead = false;
 
+	UPROPERTY(EditAnywhere, Category="MySettings")
+	TSubclassOf<class UGameOver> gameover_BP;
 
+	void ShowGameOverUI();
+	void HideGameOverUI();
+
+	UPROPERTY(EditAnywhere, Category = "MySettings")
+	TSubclassOf<class UGameStart> gameStartWidget_bp;	
+
+protected:
+	virtual void BeginPlay() override;
+
+private:
+	class UGameOver* gameOverUI;
+	class UGameStart* gameStartUI;
 };
