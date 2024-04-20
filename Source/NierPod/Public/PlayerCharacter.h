@@ -88,6 +88,9 @@ public:
 
 	class ABossCharacter* bossCharacter;
 	
+	//카메라시점 변경 함수 
+	UFUNCTION()
+	void SwitchCameraToBoss();
 private:
 
 	FVector moveDirection;
@@ -118,8 +121,6 @@ private:
 	void PlayerDie();
 	UFUNCTION()
 	void EndAttack();
-	UFUNCTION()
-	void SwitchCameraToBoss();
 
 
 	

@@ -87,6 +87,7 @@ void ABossCharacter::BeginPlay()
 	{
 		damageFX = *iter;
 	}
+
 }
 
 void ABossCharacter::Tick(float DeltaTime)
@@ -461,11 +462,15 @@ void ABossCharacter::Phasing(float deltaSeconds)
 	//슈팅페이즈 조건이 할당되지 않았다면 
 	if (bPhaseChanged == false)
 	{	//움직이기 + 공격 시작 
-		UE_LOG(LogTemp, Warning, TEXT("00000000000000000000"));
+		APlayerCharacter* player = Cast<APlayerCharacter> (target);
+		if (player != nullptr)
+		{
+			player->SwitchCameraToBoss();
+		}
+
 		currentTime += deltaSeconds;
 		if(currentTime > 2.0f)
 		{ 
-		UE_LOG(LogTemp, Warning, TEXT("1111111111111111111111"));
 		bossState = EBossState:: MOVE;
 		}
 	}
@@ -481,8 +486,15 @@ void ABossCharacter::Phasing(float deltaSeconds)
 			if (teleportLoc != nullptr)
 			{	// 텔레포트 
 				SetActorLocation(teleportLoc->GetActorLocation());
+
+				//카메라전환
+				APlayerCharacter* player = Cast<APlayerCharacter>(target);
+				if (player != nullptr)
+				{
+					player->SwitchCameraToBoss();
+				}
 				currentTime += deltaSeconds;
-				if (currentTime > 2.0f)
+				if (currentTime > 2.5f)
 				{	//2초 뒤 슈팅페이즈 시작 
 					bossState = EBossState::SHOOTATTACK;
 				}

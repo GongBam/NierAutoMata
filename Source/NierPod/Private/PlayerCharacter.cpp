@@ -106,9 +106,6 @@ void APlayerCharacter::Tick(float DeltaTime)
     {
         SetActorLocation(PlayerLocation);
     }
-   
-
-
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -337,11 +334,17 @@ void APlayerCharacter::EndAttack()
     Loca = false;
 }
 
+//보스 페이즈전환시 카메라 전환(시네마틱시퀀스) 
 void APlayerCharacter::SwitchCameraToBoss()
-{
-   FViewTargetTransitionParams params;
+{   
+   //보스 찍고있는 카메라로 이동 
    UCameraComponent* bc = bossCharacter->bossCamera;
-   pc -> SetViewTarget(bossCharacter, params);
+   pc -> SetViewTargetWithBlend(bossCharacter, 0.5f);
+   //0.5초 뒤 다시 본래 플레이어 카메라로 이동 
+   FTimerHandle cameraHandle;
+   GetWorldTimerManager().SetTimer(cameraHandle, FTimerDelegate::CreateLambda([&]() {
+       pc->SetViewTargetWithBlend(this, 1.0f);
+       }), 0.5f, false);
 }
 
 
