@@ -44,6 +44,9 @@ public:
 	EBossState bossState = EBossState::IDLE;
 
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
+	class UCameraComponent* bossCamera; 
+
+	UPROPERTY(EditAnywhere, Category = "BossSettings")
 	int32 maxHP = 1000;
 
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
@@ -93,6 +96,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
 	class UBoxComponent* rightFootCollision;
+
+	UPROPERTY(EditAnywhere, Category = "BossSettings")
+	class ADamageEffectActor* damageFX;
 	
 	UFUNCTION()
 	void OnDealDamageOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SewwpResult);

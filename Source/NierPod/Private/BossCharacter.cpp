@@ -13,10 +13,15 @@
 #include "BossTeleportLocationActor.h"
 #include "ShootingStartLocationActor.h"
 #include "BossReturnLocationActor.h"
-
+#include "Camera/CameraComponent.h"
+#include "DamageEffectActor.h"
 ABossCharacter::ABossCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	bossCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Boss Camera Component"));
+	bossCamera -> SetupAttachment(RootComponent);
+	bossCamera -> SetRelativeLocation(FVector(110,0,105));
 
 	//왼발 공격 콜리전
 	leftFootCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("LeftFoot Attack Collision"));
@@ -77,6 +82,10 @@ void ABossCharacter::BeginPlay()
 		{
 			bossUI->AddToViewport();
 		}
+	}
+	for (TActorIterator<ADamageEffectActor> iter(GetWorld()); iter; ++iter)
+	{
+		damageFX = *iter;
 	}
 }
 
@@ -419,6 +428,11 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 			//피격모션 후 IDLE 
 			bossState = EBossState::IDLE;
 			}
+			else if (currentHP >= 890 && currentHP <= 900)
+			{
+				currentTime = 0;
+				bossState = EBossState::PHASECHANGE;
+			}
 			//보스 체력이 900 이하라면 
 			else if (currentHP <= 900 && currentHP >= 500)
 			{
@@ -430,33 +444,50 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 				//피격모션 후 플레이어 쫓아감
 				bossState = EBossState::MOVE;
 			 }
-		}	
-	//보스체력 500-490 사이가 되면 특수페이즈 진입 
-	 if (currentHP <= 500 && currentHP >= 490 && bShootingended == false)
-	{
-		bPhaseChanged = true;
-		bossState = EBossState::PHASECHANGE;
-	}
-}
-//페이즈 모션 + 텔레포트 
-void ABossCharacter::Phasing(float deltaSeconds)
-{	
-	PlayAnimMontage(phaseChaingingMontage);
-	bShootingended = true;
-	//텔레포트할 위치용 액터를 찾음 
-	for (TActorIterator<ABossTeleportLocationActor> iter(GetWorld()); iter; ++iter)
-	{
-		teleportLoc = *iter;
-	
-		if (teleportLoc != nullptr)
-		{	// 텔레포트 
-			SetActorLocation(teleportLoc->GetActorLocation());
-			currentTime += deltaSeconds;
-			if (currentTime > 2.0f)
-			{	//2초 뒤 슈팅페이즈 시작 
-				bossState = EBossState::SHOOTATTACK;
+			//보스체력 500-490 사이가 되면 슈팅페이즈 진입 
+			else if (currentHP <= 500 && currentHP >= 490 && bShootingended == false)
+			{	
+				currentTime = 0;
+				bPhaseChanged = true;
+				bossState = EBossState::PHASECHANGE;
 			}
+		}	
+}
+//페이즈 모션 
+void ABossCharacter::Phasing(float deltaSeconds)
+{		
+	
+	PlayAnimMontage(phaseChaingingMontage);
+	//슈팅페이즈 조건이 할당되지 않았다면 
+	if (bPhaseChanged == false)
+	{	//움직이기 + 공격 시작 
+		UE_LOG(LogTemp, Warning, TEXT("00000000000000000000"));
+		currentTime += deltaSeconds;
+		if(currentTime > 2.0f)
+		{ 
+		UE_LOG(LogTemp, Warning, TEXT("1111111111111111111111"));
+		bossState = EBossState:: MOVE;
+		}
 	}
+	//슈팅페이즈 조건이 할당 되었다면 
+	else if(bPhaseChanged == true)
+	{ 
+		bShootingended = true;
+		//텔레포트할 위치용 액터를 찾음 
+		for (TActorIterator<ABossTeleportLocationActor> iter(GetWorld()); iter; ++iter)
+		{
+			teleportLoc = *iter;
+
+			if (teleportLoc != nullptr)
+			{	// 텔레포트 
+				SetActorLocation(teleportLoc->GetActorLocation());
+				currentTime += deltaSeconds;
+				if (currentTime > 2.0f)
+				{	//2초 뒤 슈팅페이즈 시작 
+					bossState = EBossState::SHOOTATTACK;
+				}
+			}
+		}
 	}
 }
 
@@ -516,13 +547,18 @@ void ABossCharacter::OnDamaged(int32 dmg)
 }
 
 //플레이어 데미지 주기
-void ABossCharacter::OnDealDamageOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SewwpResult)
+void ABossCharacter::OnDealDamageOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SeewpResult)
 {
 	// 왼발, 오른발 공격 콜리전에 플레이어가 닿았다면
 	APlayerCharacter* player = Cast<APlayerCharacter>(OtherActor);
 	if (player != nullptr)
 	{	
 		player->PlayerDamaged(damage);
+		if (damageFX != nullptr)
+		{
+			damageFX->SetActorLocation(player->GetActorLocation());
+			damageFX->PlayFX();
+		}	
 	}
 }
 

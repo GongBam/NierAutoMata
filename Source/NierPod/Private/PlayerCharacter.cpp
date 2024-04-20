@@ -337,6 +337,13 @@ void APlayerCharacter::EndAttack()
     Loca = false;
 }
 
+void APlayerCharacter::SwitchCameraToBoss()
+{
+   FViewTargetTransitionParams params;
+   UCameraComponent* bc = bossCharacter->bossCamera;
+   pc -> SetViewTarget(bossCharacter, params);
+}
+
 
 //플레이어 죽는 함수 
 void APlayerCharacter::PlayerDie()

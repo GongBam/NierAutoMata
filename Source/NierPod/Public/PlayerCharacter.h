@@ -118,8 +118,8 @@ private:
 	void PlayerDie();
 	UFUNCTION()
 	void EndAttack();
-
-
+	UFUNCTION()
+	void SwitchCameraToBoss();
 
 
 	
