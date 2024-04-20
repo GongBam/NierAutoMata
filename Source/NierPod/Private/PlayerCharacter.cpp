@@ -102,6 +102,13 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
+    if(Loca==true)
+    {
+        SetActorLocation(PlayerLocation);
+    }
+   
+
+
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -137,26 +144,27 @@ void APlayerCharacter::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 
 void APlayerCharacter::PlayerMove(const FInputActionValue& Value)
 {
-    FVector2D inputValue = Value.Get<FVector2D>();
-    moveDirection = FVector(inputValue.Y, inputValue.X, 0);
-    if(IsValid(Controller))
-    {
-        const FRotator Rotation = Controller->GetControlRotation();
-        const FRotator YawRotation(0, Rotation.Yaw,0);
-
-        const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-        const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-
-        AddMovementInput(ForwardDirection, inputValue.Y);
-        AddMovementInput(RightDirection, inputValue.X);
-
-        if (playerAnim != nullptr)
+ 
+		FVector2D inputValue = Value.Get<FVector2D>();
+        moveDirection = FVector(inputValue.Y, inputValue.X, 0);
+        if (IsValid(Controller))
         {
-            playerAnim->moveDirection = moveDirection;
-        }
-    }
-    playerAnim->bIsAttack=false;
+            const FRotator Rotation = Controller->GetControlRotation();
+            const FRotator YawRotation(0, Rotation.Yaw, 0);
 
+            const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+            const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+            AddMovementInput(ForwardDirection, inputValue.Y);
+            AddMovementInput(RightDirection, inputValue.X);
+
+            if (playerAnim != nullptr)
+            {
+                playerAnim->moveDirection = moveDirection;
+            }
+        }
+        playerAnim->bIsAttack = false;
+   
 }
 
 void APlayerCharacter::Look(const FInputActionValue& Value)
@@ -199,6 +207,7 @@ void APlayerCharacter::Shot(const FInputActionValue& Value)
 
 void APlayerCharacter::LeftAttack(const FInputActionValue& Value)
 {
+ 
     if (GetWorldTimerManager().IsTimerActive(AttackTimer))
     {
         return;
@@ -216,6 +225,8 @@ void APlayerCharacter::LeftAttack(const FInputActionValue& Value)
         {
             left = 1;
         }
+        PlayerLocation = GetActorLocation();
+        Loca=true;
     }
     else
     {
@@ -229,8 +240,8 @@ void APlayerCharacter::LeftAttack(const FInputActionValue& Value)
 
         GetWorldTimerManager().SetTimer(AttackTimer, this, &APlayerCharacter::EndAttack, 0.5f, false);
     }
-
-}
+    
+ }
 
 void APlayerCharacter::RightAttack(const FInputActionValue& Value)
 {
@@ -263,8 +274,6 @@ void APlayerCharacter::RightAttack(const FInputActionValue& Value)
 
         GetWorldTimerManager().SetTimer(AttackTimer, this, &APlayerCharacter::EndAttack, 0.5f, false);
     }
-    
-
 }
 
 // 임시로 보스 데미지주는 함수 
@@ -325,6 +334,7 @@ void APlayerCharacter::EndAttack()
 	{
 		playerAnim->bIsAttack = false;
 	}
+    Loca = false;
 }
 
 

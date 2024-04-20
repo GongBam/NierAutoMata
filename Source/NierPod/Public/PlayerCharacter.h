@@ -92,7 +92,7 @@ private:
 
 	FVector moveDirection;
 	FTimerHandle AttackTimer;
-
+	FTimerHandle IdleTimer;
 
 	//임시로 보스 데미지주는 함수
 	UFUNCTION()
@@ -143,4 +143,7 @@ private:
 	// 이단 점프
 	bool DoubleJump;
 	bool DrawSword = false;
+	bool Loca = false;
+	FVector PlayerLocation;
+
 };
