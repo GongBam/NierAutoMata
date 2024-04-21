@@ -47,7 +47,7 @@ public:
 	class UCameraComponent* bossCamera; 
 
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
-	int32 maxHP = 1000;
+	int32 maxHP = 5000;
 
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
 	float traceSpeed = 200.0f;
@@ -89,6 +89,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
 	class UAnimMontage* phaseChaingingMontage;
 
+	UFUNCTION(BlueprintCallable)
 	void OnDamaged(int32 dmg);
 
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
@@ -99,6 +100,14 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
 	class ADamageEffectActor* damageFX;
+
+	UPROPERTY(EditAnywhere, Category = "BossSettings|Sounds")
+	class USoundBase* hitSound;
+
+	UPROPERTY(EditAnywhere, Category = "BossSettings|Sounds")
+	class USoundBase* shieldSound;
+
+
 	
 	UFUNCTION()
 	void OnDealDamageOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SewwpResult);
@@ -131,10 +140,12 @@ private:
 
 	int32 currentHP = 0;
 	FVector hitLocation;
+
 	bool bIsAttacked = false;
 	bool shieldSpawn = false;
 	bool bPhaseChanged = false;
 	bool bShootingended = false;
+	bool bPlayerAttacekd = false;
 
 
 	void CheckDistance();

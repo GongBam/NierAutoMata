@@ -15,6 +15,7 @@
 #include "Shield.h"
 #include "NierGameModeBase.h"
 #include "PlayerDamageEffectActor.h"
+#include "Kismet/GameplayStatics.h"
 
 APlayerCharacter::APlayerCharacter()
 {   
@@ -147,6 +148,12 @@ void APlayerCharacter::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActo
             damageFX->SetActorLocation(boss->GetActorLocation());
             damageFX->PlayFX();
         }
+        //Ä®¸Â´Â ¼Ò¸®
+
+        if (swordHitSound != nullptr)
+        {
+            UGameplayStatics::PlaySoundAtLocation(GetWorld(), swordHitSound, boss->GetActorLocation(), boss->GetActorRotation());
+        }
     }
 }
 
@@ -224,6 +231,11 @@ void APlayerCharacter::LeftAttack(const FInputActionValue& Value)
     {
         FString sectionName = FString("Left") + FString::FromInt(left);
         PlayAnimMontage(Left_montages, 1.5f, FName(sectionName));
+        //Ä® ÈÖµÎ¸£´Â ¼Ò¸® 
+        if (swordSound != nullptr)
+        {
+            UGameplayStatics::PlaySoundAtLocation(GetWorld(), swordSound, GetActorLocation(), GetActorRotation());
+        }
 
         UE_LOG(LogTemp, Warning, TEXT("%d"), left);
 
@@ -239,9 +251,14 @@ void APlayerCharacter::LeftAttack(const FInputActionValue& Value)
     else
     {
         PlayAnimMontage(Draw_montage, 1.5f);
+        //Ä® ÈÖµÎ¸£´Â ¼Ò¸® 
+        if (swordSound != nullptr)
+        {
+            UGameplayStatics::PlaySoundAtLocation(GetWorld(), swordSound, GetActorLocation(), GetActorRotation());
+        }
         DrawSword = true;
     }
-
+    
     if(playerAnim!=nullptr)
     {
         playerAnim->bIsAttack=true;
@@ -262,6 +279,11 @@ void APlayerCharacter::RightAttack(const FInputActionValue& Value)
     {
         FString sectionName = FString("Right") + FString::FromInt(right);
         PlayAnimMontage(Right_montages, 1.5f, FName(sectionName));
+        //Ä® ÈÖµÎ¸£´Â ¼Ò¸® 
+        if (swordSound != nullptr)
+        {
+            UGameplayStatics::PlaySoundAtLocation(GetWorld(), swordSound, GetActorLocation(), GetActorRotation());
+        }
         damage = 20;
         UE_LOG(LogTemp, Warning, TEXT("%d"), right);
         right = right + 1;
@@ -274,6 +296,11 @@ void APlayerCharacter::RightAttack(const FInputActionValue& Value)
     else
     {
         PlayAnimMontage(Draw_montage, 1.5f);
+        //Ä® ÈÖµÎ¸£´Â ¼Ò¸®
+        if (swordSound != nullptr)
+        {
+            UGameplayStatics::PlaySoundAtLocation(GetWorld(), swordSound, GetActorLocation(), GetActorRotation());
+        }
         DrawSword = true;
     }
     if (playerAnim != nullptr)
@@ -302,6 +329,11 @@ void APlayerCharacter::DAMAGING(const FInputActionValue& Value)
       if (bossCharacter != nullptr)
       {   
           bossCharacter->OnDamaged(damage + 50);
+          //Ä®¸Â´Â ¼Ò¸®
+          if (swordHitSound != nullptr)
+          {
+              UGameplayStatics::PlaySoundAtLocation(GetWorld(), swordHitSound, bossCharacter->GetActorLocation(), bossCharacter->GetActorRotation());
+          }
       }
     }
    
@@ -331,7 +363,7 @@ void APlayerCharacter::PlayerDamagedWithKnockBack(int32 dmg)
     currentHP = FMath::Clamp(currentHP - dmg, 0, maxHP);
 
     FVector backVac = GetActorForwardVector() * -1.0f;
-    FVector targetLoc = GetActorLocation() + backVac * 100.0f;
+    FVector targetLoc = GetActorLocation() + backVac * 50.0f;
     FVector knockBackLocation = FMath::Lerp(GetActorLocation(), targetLoc, GetWorld()->GetDeltaSeconds() * 2);
     SetActorLocation(knockBackLocation, true);
 

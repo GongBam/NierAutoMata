@@ -15,13 +15,15 @@
 #include "BossReturnLocationActor.h"
 #include "Camera/CameraComponent.h"
 #include "DamageEffectActor.h"
+#include "Kismet/GameplayStatics.h"
+
 ABossCharacter::ABossCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
+	
 	bossCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Boss Camera Component"));
 	bossCamera -> SetupAttachment(RootComponent);
-	bossCamera -> SetRelativeLocation(FVector(110,0,105));
+	bossCamera -> SetRelativeLocation(FVector(135,0,109));
 
 	//왼발 공격 콜리전
 	leftFootCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("LeftFoot Attack Collision"));
@@ -165,7 +167,7 @@ void ABossCharacter::CheckDistance()
 void ABossCharacter::Idle(float DeltaSeconds)
 {	
 	//보스 피가 900 이하라면 MOVE 상태로 전환 - 첫 페이즈 시작
-	if (currentHP <= 900.0f)
+	if (currentHP <= 4800.0f)
 	{
 		bossState = EBossState::MOVE;
 	}
@@ -173,8 +175,12 @@ void ABossCharacter::Idle(float DeltaSeconds)
 
 void ABossCharacter::AttackReady()
 {	// 특정 STATE 와 중복되지 않게 막기 
+	if (bIsAttacked == true)
+	{
+		CheckDistance();
+	}
 	if (bossState == EBossState::BLOCK || bossState == EBossState::BLOCKATTACK) {return;}
-
+	
 	//플레이어 거리가 attackDistance 보다 작으면
 	if (FVector::Distance(GetActorLocation(), target->GetActorLocation()) < attackDistance)
 		{	//랜덤 발차기 
@@ -325,14 +331,19 @@ void ABossCharacter::Rolling(float deltaSeconds)
 void ABossCharacter::AttackDelay(float deltaSeconds)
 {	
 	currentTime += deltaSeconds;
-	if (currentTime > attackDelayTime && bIsAttacked == false)
-	{	//다음 공격 준비 
-		currentTime = 0;
-		bossState = EBossState::ATTACKREADY;
-	}
-	else
-	{	//플레이어와의 거리가 공격가능 범위보다 멀다면 거리계산해서 MOVE 혹은 ROLLING>MOVE 
-		CheckDistance();
+	if (currentTime > attackDelayTime)
+	{
+		if (bIsAttacked == false)
+		{
+			//다음 공격 준비 
+			currentTime = 0;
+			bossState = EBossState::ATTACKREADY;
+		}
+		else if (bIsAttacked == true)
+		{	//공격받았다면 다시 플레이어 찾음 
+			currentTime = 0;
+			CheckDistance();
+		}
 	}
 }
 //방어 
@@ -347,10 +358,14 @@ void ABossCharacter::Blocking(float deltaSeconds)
 		//제자리에서 쉴드 생성
 		GetWorld()->SpawnActor<AShield>(shield, GetActorLocation(), GetActorRotation());
 		SetActorLocation(GetActorLocation());
+		if (shieldSound != nullptr)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), shieldSound, GetActorLocation(), GetActorRotation());
+		}
 	}	
-	//1.3초 뒤 쉴드 사라지고 BLOCKATTACK 
+	//BLOCKATTACK 
 	currentTime += deltaSeconds;
-	if (currentTime > 1.0f)
+	if (currentTime > 2.0f)
 		{	
 			currentTime = 0;
 			bossState = EBossState::BLOCKATTACK;
@@ -370,7 +385,7 @@ void ABossCharacter::BlocKAttack(float deltaSeconds)
 			sh->ShieldExtending();
 		}
 
-		if (currentTime > 0.8f)
+		if (currentTime > 1.0f)
 		{	//끝나면 상태변환 
 			currentTime = 0;
 			bossState = EBossState::ATTACKDELAY;
@@ -417,40 +432,59 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 {	
 	//페이즈 전환과정 중에는 데미지 입지 않게 설정 
 	if(bPhaseChanging == true){return;}
-	bIsAttacked = true;
 
 		currentTime += deltaSeconds;
-		if (currentTime > 0.5f)
+		if (currentTime > 2.0f)
 		{
 			currentTime = 0;
-			//보스 체력이 900 이하가 아니라면 
-			if (currentHP > 900)
+			if (currentHP > 4800)
 			{
 			//피격모션 후 IDLE 
 			bossState = EBossState::IDLE;
+			bIsAttacked = false;
 			}
-			else if (currentHP >= 890 && currentHP <= 900)
+			else if (currentHP >= 4780 && currentHP <= 4800)
 			{
 				currentTime = 0;
 				bossState = EBossState::PHASECHANGE;
+				bIsAttacked = false;
 			}
-			//보스 체력이 900 이하라면 
-			else if (currentHP <= 900 && currentHP >= 500)
-			{
-				//피격모션 후 플레이어 쫓아감 
-				bossState = EBossState::MOVE;
-			}
-			 else if (currentHP < 490)
+			 else if (currentHP < 4780 && currentHP > 4000)
 			 {
 				//피격모션 후 플레이어 쫓아감
 				bossState = EBossState::MOVE;
+				bIsAttacked = false;
 			 }
-			//보스체력 500-490 사이가 되면 슈팅페이즈 진입 
-			else if (currentHP <= 500 && currentHP >= 490 && bShootingended == false)
-			{	
+			//슈팅페이즈 진입 
+			else if (currentHP <= 4000 && currentHP >= 3980 && bShootingended == false)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"));
 				currentTime = 0;
 				bPhaseChanged = true;
+				bIsAttacked = false;
 				bossState = EBossState::PHASECHANGE;
+			}
+			else if (currentHP < 3980 && currentHP > 3000)
+			{
+				//피격모션 후 플레이어 쫓아감
+				bossState = EBossState::MOVE;
+				bIsAttacked = false;
+			}
+			//슈팅페이즈 진입 
+			else if (currentHP <= 3000 && currentHP >= 2980 && bShootingended == false)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("------------------------------------------------"));
+
+				currentTime = 0;
+				bPhaseChanged = true;
+				bIsAttacked = false;
+				bossState = EBossState::PHASECHANGE;
+			}
+			else if (currentHP < 2980)
+			{
+				//피격모션 후 플레이어 쫓아감
+				bossState = EBossState::MOVE;
+				bIsAttacked = false;
 			}
 		}	
 }
@@ -534,9 +568,10 @@ void ABossCharacter::OnDamaged(int32 dmg)
 		|| bossState == EBossState::BLOCKATTACK || bossState == EBossState::PHASECHANGE){return;}
 
 	//공격 받음 true 체크 
-	bIsAttacked = false;
+	bIsAttacked = true;
 	//HP값이 0 ~ maxHP 값 사이에만 있을 수 있게 설정
 	currentHP = FMath::Clamp(currentHP - dmg, 0, maxHP);
+
 	if (bossUI != nullptr)
 	{	//체력UI 깎임 
 		bossUI->SetHealthBar((float)currentHP / (float)maxHP);
@@ -565,12 +600,25 @@ void ABossCharacter::OnDealDamageOverlapBegin(class UPrimitiveComponent* Overlap
 	APlayerCharacter* player = Cast<APlayerCharacter>(OtherActor);
 	if (player != nullptr)
 	{	
-		player->PlayerDamaged(damage);
-		if (damageFX != nullptr)
+		if (bPlayerAttacekd == false)
 		{
-			damageFX->SetActorLocation(player->GetActorLocation());
-			damageFX->PlayFX();
-		}	
+			bPlayerAttacekd = true;
+			player->PlayerDamaged(damage);
+			FTimerHandle damageHandle;
+			GetWorldTimerManager().SetTimer(damageHandle, FTimerDelegate::CreateLambda([&]() {
+				bPlayerAttacekd = false;
+				}), 0.5f, false);
+
+			if (damageFX != nullptr)
+			{
+				damageFX->SetActorLocation(player->GetActorLocation());
+				damageFX->PlayFX();
+			}
+			if (hitSound != nullptr)
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), hitSound, player->GetActorLocation(), player->GetActorRotation());
+			}
+		}
 	}
 }
 

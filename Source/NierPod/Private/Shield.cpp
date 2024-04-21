@@ -4,6 +4,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "PlayerCharacter.h"
+#include "Kismet/GameplayStatics.h"
 
 AShield::AShield()
 {
@@ -32,7 +33,7 @@ void AShield::BeginPlay()
 	//히트이벤트 바인딩 
 	sphereComp2->OnComponentBeginOverlap.AddDynamic(this, &AShield::ShieldAttacking);
 	//2초 뒤 사라지게 LifeSpan 설정
-	SetLifeSpan(2.0f);
+	SetLifeSpan(2.5f);
 	
 }
 
@@ -51,7 +52,10 @@ void AShield::ShieldExtending()
 	FVector lerpScale = FMath::Lerp(originScale, newScale, GetWorld()->GetDeltaSeconds() * 3);
 
 	sphereComp->SetRelativeScale3D(lerpScale);
-
+	if (shieldAttackSound != nullptr)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), shieldAttackSound, GetActorLocation(), GetActorRotation());
+	}
 	//0.7초 뒤 Destory 
 	FTimerHandle destoryTimer;
 	GetWorldTimerManager().SetTimer(destoryTimer, FTimerDelegate::CreateLambda([&]() {

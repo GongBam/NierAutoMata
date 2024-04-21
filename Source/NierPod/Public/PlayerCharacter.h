@@ -60,6 +60,13 @@ public:
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	class APlayerDamageEffectActor* damageFX;
 
+	UPROPERTY(EditAnywhere, Category = "PlayerSettings|Sounds")
+	class USoundBase* swordSound;
+
+	UPROPERTY(EditAnywhere, Category = "PlayerSettings|Sounds")
+	class USoundBase* swordHitSound;
+	
+
 	//일반공격 데미지받는 함수
 	UFUNCTION()
 	void PlayerDamaged(int32 dmg);

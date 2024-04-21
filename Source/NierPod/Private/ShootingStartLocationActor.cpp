@@ -4,6 +4,7 @@
 #include "Components/SceneComponent.h"
 #include "Components/ArrowComponent.h"
 #include "BossShootingActor.h"
+#include "Kismet/GameplayStatics.h"
 
 AShootingStartLocationActor::AShootingStartLocationActor()
 {
@@ -36,6 +37,10 @@ void AShootingStartLocationActor::Tick(float DeltaTime)
 			FActorSpawnParameters params;
 			params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 			GetWorld()->SpawnActor<ABossShootingActor>(shooting_bp, arrowComp->GetComponentLocation(), arrowComp->GetComponentRotation(), params);
+			if (shootingSound != nullptr)
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), shootingSound, GetActorLocation(), GetActorRotation());
+			}
 
 			currentTime = 0;
 		}

@@ -31,6 +31,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
 	int32 damage = 50;
 
+	UPROPERTY(EditAnywhere, Category = "BossSettings|Sounds")
+	class USoundBase* shieldAttackSound;
+
 	class APlayerCharacter* player;
 
 	UFUNCTION()

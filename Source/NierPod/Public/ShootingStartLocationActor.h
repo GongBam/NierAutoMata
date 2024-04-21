@@ -31,6 +31,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category="BossSettings")
 	TSubclassOf<class ABossShootingActor> shooting_bp;
+	
+	UPROPERTY(EditAnywhere, Category = "BossSettings|Sounds")
+	class USoundBase* shootingSound;
 
 	bool bShoting = false;
 

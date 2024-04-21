@@ -6,6 +6,7 @@
 #include "PlayerCharacter.h"
 #include "EngineUtils.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetMathLibrary.h>
+#include "Kismet/GameplayStatics.h"
 
 ABossShootingActor::ABossShootingActor()
 {
@@ -54,6 +55,10 @@ void ABossShootingActor::OnOverlapPlayer(UPrimitiveComponent* OverlappedComponen
 	if(player != nullptr)
 	{
 		player->PlayerDamaged(damage);
+		if (damagedSound != nullptr)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), damagedSound, player->GetActorLocation(), player->GetActorRotation());
+		}
 		Destroy();
 	}
 }
