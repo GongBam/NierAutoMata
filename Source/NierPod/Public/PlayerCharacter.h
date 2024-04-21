@@ -52,6 +52,10 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "MySettings|Inputs")
 	class UAnimMontage* Die_montage;
+	UPROPERTY(EditAnywhere, Category = "MySettings|Inputs")
+	class UAnimMontage* Dodge_montage;
+	UPROPERTY(EditAnywhere, Category = "MySettings|Inputs")
+	class UAnimMontage* OnDamaged_montage;
 
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	class APlayerDamageEffectActor* damageFX;
@@ -118,6 +122,9 @@ private:
 	void LeftAttack(const FInputActionValue& Value);
 	UFUNCTION()
 	void RightAttack(const FInputActionValue& Value);
+	UFUNCTION()
+	void Dodge(const FInputActionValue& Value);
+
 
 
 	UFUNCTION()

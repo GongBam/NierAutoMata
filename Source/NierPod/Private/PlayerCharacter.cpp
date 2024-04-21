@@ -284,10 +284,18 @@ void APlayerCharacter::RightAttack(const FInputActionValue& Value)
     }
 }
 
+void APlayerCharacter::Dodge(const FInputActionValue& Value)
+{
+    PlayAnimMontage(Dodge_montage, 1.5f);
+    // DodgeAnim 이 실행 되는 동안 캐릭터에게 들어오는 데미지가 0이 되어야 한다.
+ 
+
+}
+
+
 // 임시로 보스 데미지주는 함수 
 void APlayerCharacter::DAMAGING(const FInputActionValue& Value)
 {
-   
     for(TActorIterator<ABossCharacter> iter(GetWorld()); iter; ++iter)
     {
         bossCharacter = *iter;
@@ -296,7 +304,9 @@ void APlayerCharacter::DAMAGING(const FInputActionValue& Value)
           bossCharacter->OnDamaged(damage + 50);
       }
     }
+   
 }
+
 //플레이어 데미지 입는 함수 
 void APlayerCharacter::PlayerDamaged(int32 dmg)
 {   
@@ -312,6 +322,7 @@ void APlayerCharacter::PlayerDamaged(int32 dmg)
         //죽는함수 호출 
         PlayerDie();
     }
+    PlayAnimMontage(OnDamaged_montage, 1.5f);
 }
 //플레이어 데미지 입음 + 뒤로 튕겨지는 함수 
 void APlayerCharacter::PlayerDamagedWithKnockBack(int32 dmg)
