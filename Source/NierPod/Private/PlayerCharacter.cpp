@@ -14,6 +14,7 @@
 #include "TEST2BAnimInstance.h"
 #include "Shield.h"
 #include "NierGameModeBase.h"
+#include "PlayerDamageEffectActor.h"
 
 APlayerCharacter::APlayerCharacter()
 {   
@@ -96,6 +97,11 @@ void APlayerCharacter::BeginPlay()
             playerUI->AddToViewport();
         }
     }
+    //데미지액터 미리 받아둠 
+    for (TActorIterator<APlayerDamageEffectActor> iter(GetWorld()); iter; ++iter)
+    {
+        damageFX = *iter;
+    }
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -136,6 +142,11 @@ void APlayerCharacter::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActo
     {
         boss->OnDamaged(damage);
         UE_LOG(LogTemp, Warning, TEXT("%d"), damage);
+        if (damageFX != nullptr)
+        {
+            damageFX->SetActorLocation(boss->GetActorLocation());
+            damageFX->PlayFX();
+        }
     }
 }
 

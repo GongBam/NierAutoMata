@@ -53,6 +53,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "MySettings|Inputs")
 	class UAnimMontage* Die_montage;
 
+	UPROPERTY(EditAnywhere, Category = "MySettings")
+	class APlayerDamageEffectActor* damageFX;
+
 	//일반공격 데미지받는 함수
 	UFUNCTION()
 	void PlayerDamaged(int32 dmg);
