@@ -28,3 +28,8 @@ void UTEST2BAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	}
 
 }
+
+void UTEST2BAnimInstance::AnimNotify_DodgeEnd()
+{
+	player->DodgeFinished();
+}

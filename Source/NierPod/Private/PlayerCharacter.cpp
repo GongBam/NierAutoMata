@@ -322,12 +322,23 @@ void APlayerCharacter::RightAttack(const FInputActionValue& Value)
 
 void APlayerCharacter::Dodge(const FInputActionValue& Value)
 {
+    
     PlayAnimMontage(Dodge_montage, 1.5f);
     // DodgeAnim 이 실행 되는 동안 캐릭터에게 들어오는 데미지가 0이 되어야 한다.
- 
+  
+   
+    isDodge=true;
+   
+    UE_LOG(LogTemp, Warning , TEXT("Dodge Mode"));
+		
+ }
 
+void APlayerCharacter::DodgeFinished()
+{
+     isDodge = false;
+
+     UE_LOG(LogTemp, Warning, TEXT("Dodge Mode off"));
 }
-
 
 // 임시로 보스 데미지주는 함수 
 void APlayerCharacter::DAMAGING(const FInputActionValue& Value)
@@ -351,20 +362,28 @@ void APlayerCharacter::DAMAGING(const FInputActionValue& Value)
 //플레이어 데미지 입는 함수 
 void APlayerCharacter::PlayerDamaged(int32 dmg)
 {   
- 
-    //체력깎기 (체력 0~maxHP 범위로 설정)
-    currentHP = FMath::Clamp(currentHP - dmg, 0, maxHP);
-    if(playerUI != nullptr)
-    {   //깎인 체력으로 체력바 UI 갱신 
-       playerUI->SetHealthBar((float)currentHP / (float)maxHP);
+    if(isDodge==true)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Dodge"));
+        return;
     }
-    // 맞았을 때 체력이 0이거나 0보다 작아지면
-    if (currentHP <= 0)
-    {   
-        //죽는함수 호출 
-        PlayerDie();
+    else
+    {
+        //체력깎기 (체력 0~maxHP 범위로 설정)
+        currentHP = FMath::Clamp(currentHP - dmg, 0, maxHP);
+        if(playerUI != nullptr)
+        {   //깎인 체력으로 체력바 UI 갱신 
+        playerUI->SetHealthBar((float)currentHP / (float)maxHP);
+        }
+        // 맞았을 때 체력이 0이거나 0보다 작아지면
+        if (currentHP <= 0)
+        {   
+            //죽는함수 호출 
+            PlayerDie();
+        }
+        PlayAnimMontage(OnDamaged_montage, 1.5f);
+        UE_LOG(LogTemp, Warning , TEXT("UnDodge"));
     }
-    PlayAnimMontage(OnDamaged_montage, 1.5f);
 }
 //플레이어 데미지 입음 + 뒤로 튕겨지는 함수 
 void APlayerCharacter::PlayerDamagedWithKnockBack(int32 dmg)

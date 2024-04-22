@@ -42,5 +42,6 @@ private:
 	UPROPERTY()
 	class UCharacterMovementComponent* playerMovementComp;
 
-
+	UFUNCTION()
+	void AnimNotify_DodgeEnd();
 };

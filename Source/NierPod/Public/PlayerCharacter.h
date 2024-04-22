@@ -109,11 +109,14 @@ public:
 	//카메라시점 변경 함수 
 	UFUNCTION()
 	void SwitchCameraToBoss();
+	UFUNCTION()
+	void DodgeFinished();
 private:
 
 	FVector moveDirection;
 	FTimerHandle AttackTimer;
 	FTimerHandle IdleTimer;
+	
 
 	//임시로 보스 데미지주는 함수
 	UFUNCTION()
@@ -169,6 +172,7 @@ private:
 	bool DoubleJump;
 	bool DrawSword = false;
 	bool Loca = false;
+	bool isDodge=false;
 	FVector PlayerLocation;
 
 };
