@@ -175,40 +175,45 @@ void ABossCharacter::Idle(float DeltaSeconds)
 
 void ABossCharacter::AttackReady()
 {	// 특정 STATE 와 중복되지 않게 막기 
+	if (bossState == EBossState::BLOCK || bossState == EBossState::BLOCKATTACK) {return;}
 	if (bIsAttacked == true)
 	{
-		CheckDistance();
+		return;
 	}
-	if (bossState == EBossState::BLOCK || bossState == EBossState::BLOCKATTACK) {return;}
-	
-	//플레이어 거리가 attackDistance 보다 작으면
-	if (FVector::Distance(GetActorLocation(), target->GetActorLocation()) < attackDistance)
-		{	//랜덤 발차기 
-			int32 num = FMath::RandRange(1,3);
-			if(num == 1)
-			{
-				bossState = EBossState::ATTACK;
-			}
-			else if(num == 2)
-			{
-				bossState = EBossState::ATTACK2;
-			}
-			//점프공격은 보스체력 500 이하에서부터 시작 
-			else if(num == 3 && bPhaseChanged == true)
-			{
+	else if (bIsAttacked == false)
+	{ 
+		//플레이어 거리가 attackDistance 보다 작으면
+		if (FVector::Distance(GetActorLocation(), target->GetActorLocation()) < attackDistance)
+			{	//랜덤 발차기 
+				int32 num = FMath::RandRange(1,3);
+				if(num == 1)
+				{	
+					bossState = EBossState::ATTACK;
+				}
+				else if(num == 2)
+				{
+					bossState = EBossState::ATTACK2;
+				}
+				//점프공격은 보스체력 500 이하에서부터 시작 
+				else if(num == 3 && bPhaseChanged == true)
+				{
 				bossState = EBossState::JUMPATTACK;
-			}
-	}
-	else 
-	{
-		CheckDistance();
+				}
+		}
+		else 
+		{
+			CheckDistance();
+		}
 	}
 }
 //일반공격1
 void ABossCharacter::Attack()
 {
 	if (bossState == EBossState::BLOCK) {return;}
-
+	if (bIsAttacked == true)
+	{
+		return;
+	}
 	//플레이어 거리가 공격범위 안에 있으면 공격 후 딜레이 
 	if (FVector::Distance(GetActorLocation(), target->GetActorLocation()) < attackDistance + 10.0f)
 	{
@@ -223,8 +228,11 @@ void ABossCharacter::Attack()
 //일반공격2
 void ABossCharacter::Attack2()
 {
+	if (bIsAttacked == true)
+	{
+		return;
+	}
 	if (bossState == EBossState::BLOCK) {return;}
-
 	//플레이어 거리가 공격범위 안에 있으면 공격 후 딜레이 
 	if (FVector::Distance(GetActorLocation(), target->GetActorLocation()) < attackDistance + 10.0f)
 	{
@@ -238,6 +246,10 @@ void ABossCharacter::Attack2()
 //보스체력 500이하부터 점프공격 시작 
 void ABossCharacter::JumpAttack()
 {
+	if (bIsAttacked == true)
+	{
+		return;
+	}
 	if (bossState == EBossState::BLOCK) { return;}
 
 	//플레이어 거리가 공격범위 안에 있으면 공격 후 딜레이 
@@ -258,7 +270,7 @@ void ABossCharacter::MoveToTarget(float deltaSeconds)
 	targetDir.Z = 0;
 
 	// 플레이어가 공격범위 안에 있다면 + 공격당하지 않았다면 
-	if (targetDir.Length() <= attackDistance)
+	if (targetDir.Length() <= attackDistance && bIsAttacked == false)
 	{	// 어택준비로 전환
 		
 		bossState = EBossState::ATTACKREADY;
@@ -434,7 +446,7 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 	if(bPhaseChanging == true){return;}
 
 		currentTime += deltaSeconds;
-		if (currentTime > 2.0f)
+		if (currentTime > 1.0f)
 		{
 			currentTime = 0;
 			if (currentHP > 4800)
