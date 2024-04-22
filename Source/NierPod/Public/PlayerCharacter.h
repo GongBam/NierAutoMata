@@ -45,6 +45,8 @@ public:
 	class UInputAction* ia_RightAttack;
 	UPROPERTY(EditAnywhere, Category = "MySettings|Inputs")
 	class UInputAction* ia_dodge;
+	UPROPERTY(EditAnywhere, category = "MySettings|Inputs")
+	class UInputAction* ia_SelfDamage;
 	UPROPERTY(EditAnywhere, Category= "MySettings|Inputs")
 	class UAnimMontage* Left_montages;
 
@@ -52,7 +54,6 @@ public:
 	class UAnimMontage* Right_montages;
 	UPROPERTY(EditAnywhere, Category = "MySettings|Inputs")
 	class UAnimMontage* Draw_montage;
-
 	UPROPERTY(EditAnywhere, Category = "MySettings|Inputs")
 	class UAnimMontage* Die_montage;
 	UPROPERTY(EditAnywhere, Category = "MySettings|Inputs")
@@ -117,6 +118,9 @@ private:
 	//임시로 보스 데미지주는 함수
 	UFUNCTION()
 	void DAMAGING(const FInputActionValue& Value);
+	//자학함수
+	UFUNCTION()
+	void SelfDamaging(const FInputActionValue& Value);
 	UFUNCTION()
 	void Look(const FInputActionValue& Value);
 	UFUNCTION()

@@ -89,7 +89,7 @@ void ABossCharacter::BeginPlay()
 	{
 		damageFX = *iter;
 	}
-
+	playerCharacter = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(),0));
 }
 
 void ABossCharacter::Tick(float DeltaTime)
@@ -100,6 +100,9 @@ void ABossCharacter::Tick(float DeltaTime)
 	{
 	case EBossState::IDLE:
 		Idle(DeltaTime);
+		break;
+	case EBossState::PLAYERKILL:
+		PlayerKilled();
 		break;
 	case EBossState::MOVE:
 		MoveToTarget(DeltaTime);
@@ -150,7 +153,11 @@ void ABossCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 }
 
 void ABossCharacter::CheckDistance()
-{
+{	
+	if (playerCharacter->currentHP <= 0)
+	{
+		bossState = EBossState::PLAYERKILL;
+	}
 	//플레이어 거리가 attackDistance 보다 멀리 있으면 다시 쫓아감
 	if (FVector::Distance(GetActorLocation(), target->GetActorLocation()) > attackDistance &&
 		FVector::Distance(GetActorLocation(), target->GetActorLocation()) < rollingDistance)
@@ -171,10 +178,16 @@ void ABossCharacter::Idle(float DeltaSeconds)
 	{
 		bossState = EBossState::MOVE;
 	}
+
 }
 
 void ABossCharacter::AttackReady()
 {	// 특정 STATE 와 중복되지 않게 막기 
+
+	if (playerCharacter->currentHP <= 0)
+	{
+		bossState = EBossState::PLAYERKILL;
+	}
 	if (bossState == EBossState::BLOCK || bossState == EBossState::BLOCKATTACK) {return;}
 	if (bIsAttacked == true)
 	{
@@ -209,6 +222,10 @@ void ABossCharacter::AttackReady()
 //일반공격1
 void ABossCharacter::Attack()
 {
+	if (playerCharacter->currentHP <= 0)
+	{
+		bossState = EBossState::PLAYERKILL;
+	}
 	if (bossState == EBossState::BLOCK) {return;}
 	if (bIsAttacked == true)
 	{
@@ -227,7 +244,11 @@ void ABossCharacter::Attack()
 }
 //일반공격2
 void ABossCharacter::Attack2()
-{
+{	
+	if (playerCharacter->currentHP <= 0)
+	{
+		bossState = EBossState::PLAYERKILL;
+	}
 	if (bIsAttacked == true)
 	{
 		return;
@@ -246,6 +267,10 @@ void ABossCharacter::Attack2()
 //보스체력 500이하부터 점프공격 시작 
 void ABossCharacter::JumpAttack()
 {
+	if (playerCharacter->currentHP <= 0)
+	{
+		bossState = EBossState::PLAYERKILL;
+	}
 	if (bIsAttacked == true)
 	{
 		return;
@@ -264,7 +289,11 @@ void ABossCharacter::JumpAttack()
 }
 //플레이어 쫓아가는 함수
 void ABossCharacter::MoveToTarget(float deltaSeconds)
-{
+{	
+	if (playerCharacter->currentHP <= 0)
+	{
+		bossState = EBossState::PLAYERKILL;
+	}
 	//플레이어 방향백터
 	FVector targetDir = target->GetActorLocation() - GetActorLocation();
 	targetDir.Z = 0;
@@ -304,7 +333,11 @@ void ABossCharacter::MoveToTarget(float deltaSeconds)
 
 // 앞구르기 
 void ABossCharacter::Rolling(float deltaSeconds)
-{	
+{		
+	if (playerCharacter->currentHP <= 0)
+	{
+		bossState = EBossState::PLAYERKILL;
+	}
 	currentTime += deltaSeconds;
 	// 특정 STATE와 중복되지 않게 막기 
 	if (bossState == EBossState::BLOCK || bossState == EBossState::DAMAGED || bossState == EBossState::BLOCKATTACK ) {return;}
@@ -341,7 +374,11 @@ void ABossCharacter::Rolling(float deltaSeconds)
 }
  //ATTACK 후 잠시 Delay
 void ABossCharacter::AttackDelay(float deltaSeconds)
-{	
+{		
+	if (playerCharacter->currentHP <= 0)
+	{
+		bossState = EBossState::PLAYERKILL;
+	}
 	currentTime += deltaSeconds;
 	if (currentTime > attackDelayTime)
 	{
@@ -360,7 +397,12 @@ void ABossCharacter::AttackDelay(float deltaSeconds)
 }
 //방어 
 void ABossCharacter::Blocking(float deltaSeconds)
-{	//쉴드가 생성된 상황이 아니라면 
+{	
+	if (playerCharacter->currentHP <= 0)
+	{
+		bossState = EBossState::PLAYERKILL;
+	}
+	//쉴드가 생성된 상황이 아니라면 
 	if (shieldSpawn == false)
 	{
 		//쉴드 연속으로 생성하지 않도록, 쉴드 생성 후 shieldSpawn = ture 체크 
@@ -387,7 +429,12 @@ void ABossCharacter::Blocking(float deltaSeconds)
 }
 //방어 후 바로 방어공격 
 void ABossCharacter::BlocKAttack(float deltaSeconds)
-{	//방어공격 애니메이션 실행시간 맞추기 위한 시간재기 
+{	
+	if (playerCharacter->currentHP <= 0)
+	{
+		bossState = EBossState::PLAYERKILL;
+	}
+	//방어공격 애니메이션 실행시간 맞추기 위한 시간재기 
 	currentTime += deltaSeconds;
 	for (TActorIterator<AShield> it(GetWorld()); it; ++it)
 	{
@@ -407,6 +454,10 @@ void ABossCharacter::BlocKAttack(float deltaSeconds)
 
 void ABossCharacter::ShootingAttack(float deltaSeconds)
 {	
+	if (playerCharacter->currentHP <= 0)
+	{
+		bossState = EBossState::PLAYERKILL;
+	}
 	// teleport1 위치로 가서 슈팅 시작 
 	for (TActorIterator<AShootingStartLocationActor> iter(GetWorld()); iter; ++iter)
 	{
@@ -442,6 +493,10 @@ void ABossCharacter::ShootingAttack(float deltaSeconds)
 
 void ABossCharacter::DamageProcess(float deltaSeconds)
 {	
+	if (playerCharacter->currentHP <= 0)
+	{
+		bossState = EBossState::PLAYERKILL;
+	}
 	//페이즈 전환과정 중에는 데미지 입지 않게 설정 
 	if(bPhaseChanging == true){return;}
 
@@ -503,7 +558,10 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 //페이즈 모션 
 void ABossCharacter::Phasing(float deltaSeconds)
 {		
-	
+	if (playerCharacter->currentHP <= 0)
+	{
+		bossState = EBossState::PLAYERKILL;
+	}
 	PlayAnimMontage(phaseChaingingMontage);
 	//슈팅페이즈 조건이 할당되지 않았다면 
 	if (bPhaseChanged == false)
@@ -652,5 +710,11 @@ void ABossCharacter::Die()
 //	GetWorldTimerManager().SetTimer(deathTimer, FTimerDelegate::CreateLambda([&](){
 //		Destroy();
 //		}), 1.0f, false);
+
+}
+
+void ABossCharacter::PlayerKilled()
+{
+	GetCharacterMovement()->DisableMovement();
 
 }

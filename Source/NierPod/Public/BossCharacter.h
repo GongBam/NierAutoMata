@@ -9,6 +9,7 @@ UENUM(BlueprintType)
 enum class EBossState : uint8
 {	
 	IDLE		UMETA(DisplayName = "Base State"),
+	PLAYERKILL  UMETA(DisplayName = "Player Killed State"),
 	MOVE		UMETA(DisplayName = "walk State"),
 	ATTACKREADY UMETA(DisplayName = "Attack Ready State"),
 	ROLLING		UMETA(DisplayName = "Rolling State"),
@@ -118,6 +119,9 @@ public:
 	UPROPERTY()
 	class AActor* target;
 
+	UPROPERTY()
+	class APlayerCharacter* playerCharacter;
+
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
 	TSubclassOf<class UBossHealthWidget> bossHealthWidget_bp;
 
@@ -166,6 +170,7 @@ private:
 	void DamageProcess(float deltaSeconds);
 	void Phasing(float deltaSeconds);
 	void Die();
+	void PlayerKilled();
 
 
 };

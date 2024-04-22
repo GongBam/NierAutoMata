@@ -130,6 +130,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
         enhancedInputComponent->BindAction(ia_shot, ETriggerEvent::Triggered, this, &APlayerCharacter::Shot);
         enhancedInputComponent->BindAction(ia_look, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
         enhancedInputComponent->BindAction(ia_damaging, ETriggerEvent::Started, this, &APlayerCharacter::DAMAGING);
+        enhancedInputComponent->BindAction(ia_SelfDamage, ETriggerEvent::Started, this, &APlayerCharacter::SelfDamaging);
         enhancedInputComponent->BindAction(ia_LeftAttack, ETriggerEvent::Started, this, &APlayerCharacter::LeftAttack);
         enhancedInputComponent->BindAction(ia_RightAttack, ETriggerEvent::Started, this, &APlayerCharacter::RightAttack);
         enhancedInputComponent->BindAction(ia_dodge, ETriggerEvent::Started, this, &APlayerCharacter::Dodge);
@@ -181,6 +182,11 @@ void APlayerCharacter::PlayerMove(const FInputActionValue& Value)
         }
         playerAnim->bIsAttack = false;
    
+}
+
+void APlayerCharacter::SelfDamaging(const FInputActionValue& Value)
+{
+    PlayerDamaged(100);
 }
 
 void APlayerCharacter::Look(const FInputActionValue& Value)
