@@ -132,6 +132,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
         enhancedInputComponent->BindAction(ia_damaging, ETriggerEvent::Started, this, &APlayerCharacter::DAMAGING);
         enhancedInputComponent->BindAction(ia_LeftAttack, ETriggerEvent::Started, this, &APlayerCharacter::LeftAttack);
         enhancedInputComponent->BindAction(ia_RightAttack, ETriggerEvent::Started, this, &APlayerCharacter::RightAttack);
+        enhancedInputComponent->BindAction(ia_dodge, ETriggerEvent::Started, this, &APlayerCharacter::Dodge);
     }
     
 }
@@ -344,6 +345,7 @@ void APlayerCharacter::DAMAGING(const FInputActionValue& Value)
 //플레이어 데미지 입는 함수 
 void APlayerCharacter::PlayerDamaged(int32 dmg)
 {   
+ 
     //체력깎기 (체력 0~maxHP 범위로 설정)
     currentHP = FMath::Clamp(currentHP - dmg, 0, maxHP);
     if(playerUI != nullptr)
@@ -407,6 +409,14 @@ void APlayerCharacter::SwitchCameraToBoss()
 //플레이어 죽는 함수 
 void APlayerCharacter::PlayerDie()
 {
+    if(pc!=nullptr)
+    {
+        pc->PlayerCameraManager->StartCameraFade(0,1,3.0f,FLinearColor::Black);
+
+        FTimerHandle restartHandle;
+    }
+    
     PlayAnimMontage(Die_montage);
     GetCharacterMovement()->DisableMovement(); 
+  
 }

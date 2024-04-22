@@ -43,8 +43,11 @@ public:
 	class UInputAction* ia_LeftAttack;
 	UPROPERTY(EditAnywhere, category = "MySettings|Inputs")
 	class UInputAction* ia_RightAttack;
+	UPROPERTY(EditAnywhere, Category = "MySettings|Inputs")
+	class UInputAction* ia_dodge;
 	UPROPERTY(EditAnywhere, Category= "MySettings|Inputs")
 	class UAnimMontage* Left_montages;
+
 	UPROPERTY(EditAnywhere, Category = "MySettings|Inputs")
 	class UAnimMontage* Right_montages;
 	UPROPERTY(EditAnywhere, Category = "MySettings|Inputs")
