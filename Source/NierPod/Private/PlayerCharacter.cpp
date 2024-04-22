@@ -292,6 +292,8 @@ void APlayerCharacter::RightAttack(const FInputActionValue& Value)
         {
             right = 1;
         }
+        PlayerLocation = GetActorLocation();
+        Loca = true;
     }
     else
     {
