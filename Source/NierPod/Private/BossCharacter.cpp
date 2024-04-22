@@ -473,9 +473,11 @@ void ABossCharacter::ShootingAttack(float deltaSeconds)
 		currentTime+=deltaSeconds;
 		if (currentTime > shootingTime)
 		{	
+			if(shootingLoc != nullptr)
+			{ 
 			//빛공격 비활성화
-			shootingLoc->bShoting=false;
-
+				shootingLoc->bShoting=false;
+			}
 			//땅 아래로 돌아갈 위치용 액터 찾기
 			for (TActorIterator<ABossReturnLocationActor> iters(GetWorld()); iters; ++iters)
 			{	
@@ -484,8 +486,17 @@ void ABossCharacter::ShootingAttack(float deltaSeconds)
 			if (returnLoc != nullptr)
 			{	//텔레포트 
 				SetActorLocation(returnLoc->GetActorLocation());
+				if (bFirstShooting == false)
+				{	
+					bFirstShooting = true;
+					CheckDistance();
+				}
+				else if (bFirstShooting == true && bSecondShooting == false)
+				{
+					bSecondShooting = true;
+					CheckDistance();
+				}
 				// 다시 플레이어와의 거리 계산하며 MOVE 혹은 ROLLING>MOVE 판단
-				CheckDistance();
 			}
 		}
 	}
@@ -523,31 +534,28 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 				bIsAttacked = false;
 			 }
 			//슈팅페이즈 진입 
-			else if (currentHP <= 4000 && currentHP >= 3980 && bShootingended == false)
+			else if (currentHP <= 4000 && bFirstShooting == false)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"));
 				currentTime = 0;
 				bPhaseChanged = true;
 				bIsAttacked = false;
 				bossState = EBossState::PHASECHANGE;
 			}
-			else if (currentHP < 3980 && currentHP > 3000)
+			else if (currentHP < 4000 && currentHP > 3000 && bFirstShooting == true)
 			{
 				//피격모션 후 플레이어 쫓아감
 				bossState = EBossState::MOVE;
 				bIsAttacked = false;
 			}
 			//슈팅페이즈 진입 
-			else if (currentHP <= 3000 && currentHP >= 2980 && bShootingended == false)
+			else if (currentHP <= 3000 && bSecondShooting == false)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("------------------------------------------------"));
-
 				currentTime = 0;
 				bPhaseChanged = true;
 				bIsAttacked = false;
 				bossState = EBossState::PHASECHANGE;
 			}
-			else if (currentHP < 2980)
+			else if (currentHP < 3000 && bSecondShooting == true)
 			{
 				//피격모션 후 플레이어 쫓아감
 				bossState = EBossState::MOVE;
@@ -581,26 +589,52 @@ void ABossCharacter::Phasing(float deltaSeconds)
 	//슈팅페이즈 조건이 할당 되었다면 
 	else if(bPhaseChanged == true)
 	{ 
-		bShootingended = true;
+		if (bFirstShooting == false)
+		{
 		//텔레포트할 위치용 액터를 찾음 
 		for (TActorIterator<ABossTeleportLocationActor> iter(GetWorld()); iter; ++iter)
-		{
-			teleportLoc = *iter;
+			{
+				teleportLoc = *iter;
 
-			if (teleportLoc != nullptr)
-			{	// 텔레포트 
-				SetActorLocation(teleportLoc->GetActorLocation());
+				if (teleportLoc != nullptr)
+				{	// 텔레포트 
+					SetActorLocation(teleportLoc->GetActorLocation());
 
-				//카메라전환
-				APlayerCharacter* player = Cast<APlayerCharacter>(target);
-				if (player != nullptr)
-				{
-					player->SwitchCameraToBoss();
+					//카메라전환
+					APlayerCharacter* player = Cast<APlayerCharacter>(target);
+					if (player != nullptr)
+					{
+						player->SwitchCameraToBoss();
+					}
+					currentTime += deltaSeconds;
+					if (currentTime > 2.5f)
+					{	//2초 뒤 슈팅페이즈 시작 
+						bossState = EBossState::SHOOTATTACK;
+					}
 				}
-				currentTime += deltaSeconds;
-				if (currentTime > 2.5f)
-				{	//2초 뒤 슈팅페이즈 시작 
-					bossState = EBossState::SHOOTATTACK;
+			}
+		}
+		else if (bSecondShooting == false)
+		{	//텔레포트할 위치용 액터를 찾음 
+			for (TActorIterator<ABossTeleportLocationActor> iter(GetWorld()); iter; ++iter)
+			{
+				teleportLoc = *iter;
+
+				if (teleportLoc != nullptr)
+				{	// 텔레포트 
+					SetActorLocation(teleportLoc->GetActorLocation());
+
+					//카메라전환
+					APlayerCharacter* player = Cast<APlayerCharacter>(target);
+					if (player != nullptr)
+					{
+						player->SwitchCameraToBoss();
+					}
+					currentTime += deltaSeconds;
+					if (currentTime > 2.5f)
+					{	//2초 뒤 슈팅페이즈 시작 
+						bossState = EBossState::SHOOTATTACK;
+					}
 				}
 			}
 		}
@@ -632,6 +666,7 @@ void ABossCharacter::PhaseChangeEnd()
 void ABossCharacter::OnDamaged(int32 dmg)
 {	//보스 텔레포트+슈팅 하는 페이즈 '돌입과정' 에서는 데미지 적용 X
 	if (bPhaseChanging == true) {return;}
+
 	//보스가 공격중 / 방어중 / 페이즈 전환중 일 땐 데미지 적용 X 
 	if (bossState == EBossState::ATTACK || bossState == EBossState::ATTACK2
 		|| bossState == EBossState::JUMPATTACK || bossState == EBossState::BLOCK 
@@ -642,6 +677,8 @@ void ABossCharacter::OnDamaged(int32 dmg)
 	//HP값이 0 ~ maxHP 값 사이에만 있을 수 있게 설정
 	currentHP = FMath::Clamp(currentHP - dmg, 0, maxHP);
 
+	if(bossState == EBossState::SHOOTATTACK) {return;}
+
 	if (bossUI != nullptr)
 	{	//체력UI 깎임 
 		bossUI->SetHealthBar((float)currentHP / (float)maxHP);
@@ -650,9 +687,9 @@ void ABossCharacter::OnDamaged(int32 dmg)
 	// 데미지 계산 결과, 현재 체력이 0 보다 크면
 	if (currentHP > 0)
 	{	
-		//DamageProcess 로 전환
-		bossState = EBossState::DAMAGED;
-		hitLocation = GetActorLocation();
+			//DamageProcess 로 전환
+			bossState = EBossState::DAMAGED;
+			hitLocation = GetActorLocation();
 	}
 	// 데미지 계산 결과, 현재 체력이 0 이하라면 
 	if (currentHP <= 0)

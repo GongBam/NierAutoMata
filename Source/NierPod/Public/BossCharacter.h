@@ -150,6 +150,8 @@ private:
 	bool bPhaseChanged = false;
 	bool bShootingended = false;
 	bool bPlayerAttacekd = false;
+	bool bFirstShooting = false;
+	bool bSecondShooting = false;
 
 
 	void CheckDistance();
