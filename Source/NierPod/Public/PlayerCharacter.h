@@ -111,6 +111,10 @@ public:
 	void SwitchCameraToBoss();
 	UFUNCTION()
 	void DodgeFinished();
+
+	UPROPERTY(BlueprintReadWrite, Category = "MySettings")
+	bool bIsDead = false;
+
 private:
 
 	FVector moveDirection;
@@ -158,10 +162,13 @@ private:
 	UPROPERTY()
 	class UTEST2BAnimInstance* playerAnim;
 
+	class ANierGameModeBase* nierGM;
+
 	bool canDash = true;
 	FVector OldVelocity;
 	FVector Velocity;
 	float DashCooldown = 0.2f;
+
 
 	int32 damage = 0;
 	int32 left = 1;

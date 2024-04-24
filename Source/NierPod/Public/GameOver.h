@@ -1,4 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -24,10 +23,6 @@ public:
 	UPROPERTY(VisibleAnywhere, Category="MySettings", meta=(BindWidget))
 	class UButton* btn_quit;
 
-	UPROPERTY(VisibleAnywhere, Category="MySettings", meta=(BindWidget))
-	class UButton* btn_continue;
-
-
 private:
 	UFUNCTION()
 	void RestartGame();
@@ -35,6 +30,4 @@ private:
 	UFUNCTION()
 	void QuitGame();
 
-	UFUNCTION()
-	void ContinueGame();
 };

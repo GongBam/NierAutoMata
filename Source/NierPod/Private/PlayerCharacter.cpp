@@ -70,6 +70,7 @@ void APlayerCharacter::BeginPlay()
 
      //게임 시작시 currentHP > maxHP 로 초기화
     currentHP = maxHP;
+    bIsDead = false;
 
     //플레이어 인풋맵핑 생성
     pc = GetController<APlayerController>();
@@ -103,6 +104,11 @@ void APlayerCharacter::BeginPlay()
     {
         damageFX = *iter;
     }
+
+    //GameModeBase 캐싱 
+    AGameModeBase* gm = GetWorld()->GetAuthGameMode();
+    nierGM = Cast<ANierGameModeBase>(gm);
+
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -433,7 +439,8 @@ void APlayerCharacter::SwitchCameraToBoss()
 
 //플레이어 죽는 함수 
 void APlayerCharacter::PlayerDie()
-{
+{   
+    bIsDead = true;
     if(pc!=nullptr)
     {
         pc->PlayerCameraManager->StartCameraFade(0,1,3.0f,FLinearColor::Black);
@@ -444,4 +451,14 @@ void APlayerCharacter::PlayerDie()
     PlayAnimMontage(Die_montage);
     GetCharacterMovement()->DisableMovement(); 
   
+  //게임오버 UI 띄우기
+    FTimerHandle uiHandle; 
+    GetWorldTimerManager().SetTimer(uiHandle, FTimerDelegate::CreateLambda([&]() {
+
+    if (nierGM != nullptr)
+    {
+        nierGM->ShowGameOverUI();
+    }
+        }), 3.0f, false);
+    
 }

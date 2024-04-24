@@ -1,4 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "GameOver.h"
@@ -16,7 +15,6 @@ void UGameOver::NativeConstruct()
 	// 종료 버튼의 클릭 이벤트에 QuitGame 함수를 연결한다.
 	btn_quit->OnClicked.AddDynamic(this, &UGameOver::QuitGame);
 
-	btn_continue->OnClicked.AddDynamic(this, &UGameOver::ContinueGame);
 }
 
 void UGameOver::RestartGame()
@@ -30,15 +28,4 @@ void UGameOver::QuitGame()
 	// 종료한다.
 	//UKismetSystemLibrary::QuitGame(GetWorld(), GetWorld()->GetFirstPlayerController(), EQuitPreference::Type::Quit, true);
 	GetWorld()->GetFirstPlayerController()->ConsoleCommand("Quit");
-}
-
-void UGameOver::ContinueGame()
-{
-	// 게임 모드에 있는 HideGameOverUI() 함수를 실행한다.
-	ANierGameModeBase* gm = Cast<ANierGameModeBase>(GetWorld()->GetAuthGameMode());
-
-	if (gm != nullptr)
-	{
-		gm->HideGameOverUI();
-	}
 }

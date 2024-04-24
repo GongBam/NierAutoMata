@@ -1,4 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -20,7 +19,7 @@ public:
 	
 
 	class APlayerCharacter* player;
-	class AC_BossCharacter* boss;
+	class ABossCharacter* boss;
 
 	bool bPlayerDead = false;
 	bool bBossDead = false;
@@ -29,7 +28,6 @@ public:
 	TSubclassOf<class UGameOver> gameover_BP;
 
 	void ShowGameOverUI();
-	void HideGameOverUI();
 
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	TSubclassOf<class UGameStart> gameStartWidget_bp;	
