@@ -19,13 +19,16 @@ void UGameOver::NativeConstruct()
 
 void UGameOver::RestartGame()
 {
+	
+	GetWorld()->GetWorldSettings()->SetTimeDilation(1);
+	GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(false);
+	RemoveFromParent();
 	// Level을 다시 연다.
 	UGameplayStatics::OpenLevel(GetWorld(), FName("ThirdPersonMap"));
+
 }
 
 void UGameOver::QuitGame()
 {
-	// 종료한다.
-	//UKismetSystemLibrary::QuitGame(GetWorld(), GetWorld()->GetFirstPlayerController(), EQuitPreference::Type::Quit, true);
 	GetWorld()->GetFirstPlayerController()->ConsoleCommand("Quit");
 }

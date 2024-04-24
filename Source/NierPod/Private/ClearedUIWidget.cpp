@@ -12,6 +12,9 @@ void UClearedUIWidget::NativeConstruct()
 
 void UClearedUIWidget::RestartGame()
 {
+	GetWorld()->GetWorldSettings()->SetTimeDilation(1);
+	GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(false);
+	RemoveFromParent();
 	UGameplayStatics::OpenLevel(GetWorld(), FName("ThirdPersonMap"));
 }
 

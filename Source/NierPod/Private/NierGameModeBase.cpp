@@ -10,6 +10,8 @@ void ANierGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 
+	
+
 	gameStartUI = CreateWidget<UGameStart>(GetWorld(), gameStartWidget_bp);
 	if (gameStartUI != nullptr)
 	{
@@ -36,7 +38,6 @@ void ANierGameModeBase::BeginPlay()
 }
 void ANierGameModeBase::ShowGameOverUI()
 {	
-	GetWorldSettings()->SetTimeDilation(0);
 
 	if (gameover_BP != nullptr)
 	{
@@ -49,6 +50,7 @@ void ANierGameModeBase::ShowGameOverUI()
 
 			// 마우스 커서를 화면에 보이게 처리한다.
 			GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
+			GetWorldSettings()->SetTimeDilation(0);
 		}
 	}
 }
@@ -56,7 +58,6 @@ void ANierGameModeBase::ShowGameOverUI()
 //클리어 UI 띄움
 void ANierGameModeBase::ShowClearedUI()
 {
-	GetWorldSettings()->SetTimeDilation(0);
 
 	if (clearedWidget_bp != nullptr)
 	{
@@ -65,6 +66,7 @@ void ANierGameModeBase::ShowClearedUI()
 		{
 			clearedUI->AddToViewport();
 			GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
+			GetWorldSettings()->SetTimeDilation(0);
 		}
 	}
 }
