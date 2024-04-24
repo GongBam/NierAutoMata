@@ -4,6 +4,7 @@
 #include "BossHealthWidget.h"
 #include "GameStart.h"
 #include "GameOver.h"
+#include "ClearedUIWidget.h"
 
 void ANierGameModeBase::BeginPlay()
 {
@@ -47,6 +48,22 @@ void ANierGameModeBase::ShowGameOverUI()
 			gameOverUI->AddToViewport();
 
 			// 마우스 커서를 화면에 보이게 처리한다.
+			GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
+		}
+	}
+}
+
+//클리어 UI 띄움
+void ANierGameModeBase::ShowClearedUI()
+{
+	GetWorldSettings()->SetTimeDilation(0);
+
+	if (clearedWidget_bp != nullptr)
+	{
+		clearedUI = CreateWidget<UClearedUIWidget>(GetWorld(), clearedWidget_bp);
+		if (clearedUI != nullptr)
+		{
+			clearedUI->AddToViewport();
 			GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
 		}
 	}

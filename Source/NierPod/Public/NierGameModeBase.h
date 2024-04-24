@@ -27,10 +27,15 @@ public:
 	UPROPERTY(EditAnywhere, Category="MySettings")
 	TSubclassOf<class UGameOver> gameover_BP;
 
-	void ShowGameOverUI();
-
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	TSubclassOf<class UGameStart> gameStartWidget_bp;	
+
+	UPROPERTY(EditAnywhere, Category = "MySettings")
+	TSubclassOf<class UClearedUIWidget> clearedWidget_bp;	
+
+	void ShowGameOverUI();
+
+	void ShowClearedUI();
 
 protected:
 	virtual void BeginPlay() override;
@@ -38,4 +43,5 @@ protected:
 private:
 	class UGameOver* gameOverUI;
 	class UGameStart* gameStartUI;
+	class UClearedUIWidget* clearedUI;
 };

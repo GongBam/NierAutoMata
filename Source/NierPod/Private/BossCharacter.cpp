@@ -16,6 +16,7 @@
 #include "Camera/CameraComponent.h"
 #include "DamageEffectActor.h"
 #include "Kismet/GameplayStatics.h"
+#include "NierGameModeBase.h"
 
 ABossCharacter::ABossCharacter()
 {
@@ -90,6 +91,11 @@ void ABossCharacter::BeginPlay()
 		damageFX = *iter;
 	}
 	playerCharacter = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(),0));
+
+
+	//GameModeBase Ä³½Ì 
+	AGameModeBase* gm = GetWorld()->GetAuthGameMode();
+	nierGM = Cast<ANierGameModeBase>(gm);
 }
 
 void ABossCharacter::Tick(float DeltaTime)
@@ -731,6 +737,13 @@ void ABossCharacter::OnDealDamageOverlapBegin(class UPrimitiveComponent* Overlap
 
 void ABossCharacter::Die()
 {	
+	
+	pc = GetController<APlayerController>();
+	if (pc != nullptr)
+	{
+		pc->PlayerCameraManager->StartCameraFade(0, 1, 3.0f, FLinearColor::Black);
+	}
+
 	//Á×´Â¾Ö´Ô¸ùÅ¸ÁÖ ½ÇÇà 
 	PlayAnimMontage(death_Montage);
 	//ÄÝ¸®Àü ´Ù ²¨¹ö¸²
@@ -747,6 +760,17 @@ void ABossCharacter::Die()
 //	GetWorldTimerManager().SetTimer(deathTimer, FTimerDelegate::CreateLambda([&](){
 //		Destroy();
 //		}), 1.0f, false);
+	
+
+  //°ÔÀÓÅ¬¸®¾î UI ¶ç¿ì±â
+	FTimerHandle uiHandle;
+	GetWorldTimerManager().SetTimer(uiHandle, FTimerDelegate::CreateLambda([&]() {
+
+		if (nierGM != nullptr)
+		{
+			nierGM->ShowClearedUI();
+		}
+		}), 2.0f, false);
 
 }
 

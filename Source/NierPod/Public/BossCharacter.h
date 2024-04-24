@@ -137,6 +137,11 @@ public:
 private:
 
 	class UBossHealthWidget* bossUI;
+	class ANierGameModeBase* nierGM;
+
+	
+	UPROPERTY()
+	class APlayerController* pc;
 
 
 	float currentTime = 0;
