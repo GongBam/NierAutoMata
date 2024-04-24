@@ -380,7 +380,7 @@ void ABossCharacter::Rolling(float deltaSeconds)
 }
  //ATTACK 후 잠시 Delay
 void ABossCharacter::AttackDelay(float deltaSeconds)
-{		
+{			
 	if (playerCharacter->currentHP <= 0)
 	{
 		bossState = EBossState::PLAYERKILL;
@@ -425,7 +425,7 @@ void ABossCharacter::Blocking(float deltaSeconds)
 	}	
 	//BLOCKATTACK 
 	currentTime += deltaSeconds;
-	if (currentTime > 2.0f)
+	if (currentTime > 1.0f)
 		{	
 			currentTime = 0;
 			bossState = EBossState::BLOCKATTACK;
@@ -442,18 +442,15 @@ void ABossCharacter::BlocKAttack(float deltaSeconds)
 	}
 	//방어공격 애니메이션 실행시간 맞추기 위한 시간재기 
 	currentTime += deltaSeconds;
-	for (TActorIterator<AShield> it(GetWorld()); it; ++it)
+	if (currentTime > 1.0f)
 	{
-		sh = *it;
-		if (sh != nullptr)
+		for (TActorIterator<AShield> it(GetWorld()); it; ++it)
 		{
-			sh->ShieldExtending();
-		}
-
-		if (currentTime > 1.0f)
-		{	//끝나면 상태변환 
-			currentTime = 0;
-			bossState = EBossState::ATTACKDELAY;
+			sh = *it;
+			if (sh != nullptr)
+			{
+				sh->ShieldExtending();
+			}
 		}
 	}
 }
@@ -502,7 +499,6 @@ void ABossCharacter::ShootingAttack(float deltaSeconds)
 					bSecondShooting = true;
 					CheckDistance();
 				}
-				// 다시 플레이어와의 거리 계산하며 MOVE 혹은 ROLLING>MOVE 판단
 			}
 		}
 	}
@@ -523,9 +519,9 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 			currentTime = 0;
 			if (currentHP > 4800)
 			{
-			//피격모션 후 IDLE 
-			bossState = EBossState::IDLE;
-			bIsAttacked = false;
+				//피격모션 후 IDLE 
+				bossState = EBossState::IDLE;
+				bIsAttacked = false;
 			}
 			else if (currentHP >= 4780 && currentHP <= 4800)
 			{
@@ -533,12 +529,12 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 				bossState = EBossState::PHASECHANGE;
 				bIsAttacked = false;
 			}
-			 else if (currentHP < 4780 && currentHP > 4000)
-			 {
+			else if (currentHP < 4780 && currentHP > 4000)
+			{
 				//피격모션 후 플레이어 쫓아감
 				bossState = EBossState::MOVE;
 				bIsAttacked = false;
-			 }
+			}
 			//슈팅페이즈 진입 
 			else if (currentHP <= 4000 && bFirstShooting == false)
 			{
@@ -567,7 +563,7 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 				bossState = EBossState::MOVE;
 				bIsAttacked = false;
 			}
-		}	
+		}
 }
 //페이즈 모션 
 void ABossCharacter::Phasing(float deltaSeconds)
@@ -703,6 +699,26 @@ void ABossCharacter::OnDamaged(int32 dmg)
 		//DIE 
 		bossState = EBossState::DIE;
 		Die();
+	}
+}
+
+void ABossCharacter::OnDamagedByPod(int32 dmg)
+{
+	if (bPhaseChanging == true) { return; }
+
+	//보스가 공격중 / 방어중 / 페이즈 전환중 일 땐 데미지 적용 X 
+	if (bossState == EBossState::ATTACK || bossState == EBossState::ATTACK2
+		|| bossState == EBossState::JUMPATTACK || bossState == EBossState::BLOCK
+		|| bossState == EBossState::BLOCKATTACK || bossState == EBossState::PHASECHANGE) {
+		return;
+	}
+
+	//HP값이 0 ~ maxHP 값 사이에만 있을 수 있게 설정
+	currentHP = FMath::Clamp(currentHP - dmg, 0, maxHP);
+
+	if (bossUI != nullptr)
+	{	//체력UI 깎임 
+		bossUI->SetHealthBar((float)currentHP / (float)maxHP);
 	}
 }
 

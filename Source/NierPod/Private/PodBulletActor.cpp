@@ -74,7 +74,7 @@ void APodBulletActor::OnoverlapEnermy(UPrimitiveComponent* OverlappedComponent, 
 	ABossCharacter* boss = Cast<ABossCharacter>(otherActor);
 	if (boss != nullptr)
 	{
-		boss->OnDamaged(1);
+		boss->OnDamagedByPod(1);
 
 	}
 

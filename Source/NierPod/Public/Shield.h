@@ -35,6 +35,7 @@ public:
 	class USoundBase* shieldAttackSound;
 
 	class APlayerCharacter* player;
+	class ABossCharacter* boss;
 
 	UFUNCTION()
 	void ShieldExtending();

@@ -93,6 +93,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void OnDamaged(int32 dmg);
 
+	UFUNCTION()
+	void OnDamagedByPod(int32 dmg);
+
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
 	class UBoxComponent* leftFootCollision;
 
@@ -133,6 +136,8 @@ public:
 	class AShootingStartLocationActor* shootingLoc;
 	class AShield* sh;
 
+	float currentTime = 0;
+
 
 private:
 
@@ -143,8 +148,6 @@ private:
 	UPROPERTY()
 	class APlayerController* pc;
 
-
-	float currentTime = 0;
 	
 
 	int32 currentHP = 0;

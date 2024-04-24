@@ -398,7 +398,7 @@ void APlayerCharacter::PlayerDamagedWithKnockBack(int32 dmg)
     currentHP = FMath::Clamp(currentHP - dmg, 0, maxHP);
 
     FVector backVac = GetActorForwardVector() * -1.0f;
-    FVector targetLoc = GetActorLocation() + backVac * 50.0f;
+    FVector targetLoc = GetActorLocation() + backVac * 5.0f;
     FVector knockBackLocation = FMath::Lerp(GetActorLocation(), targetLoc, GetWorld()->GetDeltaSeconds() * 2);
     SetActorLocation(knockBackLocation, true);
 
