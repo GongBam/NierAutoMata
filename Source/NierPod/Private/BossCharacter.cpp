@@ -72,8 +72,11 @@ void ABossCharacter::BeginPlay()
 	//현재 체력 max 로 초기화
 	currentHP = maxHP;
 
-	//공격받았는지 상태 false 초기화
+	//상태 모두 초기화
 	bIsAttacked = false;
+	bFirstPhase = false;
+	bFirstShooting = false;
+	bSecondShooting = false;
 
 	//체력바 UI 위젯 받아오고 뷰포트에 붙임
 	bossUI = Cast<UBossHealthWidget>(bosswidgetComp->GetWidget());
@@ -523,13 +526,13 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 				bossState = EBossState::IDLE;
 				bIsAttacked = false;
 			}
-			else if (currentHP >= 4780 && currentHP <= 4800)
+			else if (currentHP < 4800 && bFirstPhase == false)
 			{
 				currentTime = 0;
 				bossState = EBossState::PHASECHANGE;
 				bIsAttacked = false;
 			}
-			else if (currentHP < 4780 && currentHP > 4000)
+			else if (currentHP < 4800 && bFirstPhase == true)
 			{
 				//피격모션 후 플레이어 쫓아감
 				bossState = EBossState::MOVE;

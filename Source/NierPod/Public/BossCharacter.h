@@ -160,6 +160,7 @@ private:
 	bool bPlayerAttacekd = false;
 	bool bFirstShooting = false;
 	bool bSecondShooting = false;
+	bool bFirstPhase = false;
 
 
 	void CheckDistance();
