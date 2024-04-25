@@ -167,8 +167,7 @@ void APlayerCharacter::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 
 void APlayerCharacter::PlayerMove(const FInputActionValue& Value)
 {
- 
-		FVector2D inputValue = Value.Get<FVector2D>();
+    	FVector2D inputValue = Value.Get<FVector2D>();
         moveDirection = FVector(inputValue.Y, inputValue.X, 0);
         if (IsValid(Controller))
         {
@@ -187,7 +186,7 @@ void APlayerCharacter::PlayerMove(const FInputActionValue& Value)
             }
         }
         playerAnim->bIsAttack = false;
-   
+        
 }
 
 void APlayerCharacter::SelfDamaging(const FInputActionValue& Value)
@@ -278,6 +277,7 @@ void APlayerCharacter::LeftAttack(const FInputActionValue& Value)
 
         GetWorldTimerManager().SetTimer(AttackTimer, this, &APlayerCharacter::EndAttack, 0.5f, false);
     }
+    GetWorldTimerManager().SetTimer(SteasheTimer, this, &APlayerCharacter::Steashe, 5.0f, false);
     
  }
 
@@ -324,6 +324,7 @@ void APlayerCharacter::RightAttack(const FInputActionValue& Value)
 
         GetWorldTimerManager().SetTimer(AttackTimer, this, &APlayerCharacter::EndAttack, 0.5f, false);
     }
+    GetWorldTimerManager().SetTimer(SteasheTimer, this, &APlayerCharacter::Steashe, 5.0f, false);
 }
 
 void APlayerCharacter::Dodge(const FInputActionValue& Value)
@@ -421,6 +422,12 @@ void APlayerCharacter::EndAttack()
 		playerAnim->bIsAttack = false;
 	}
     Loca = false;
+}
+
+void APlayerCharacter::Steashe()
+{
+    PlayAnimMontage(steashe_montage);
+    DrawSword=false;
 }
 
 //보스 페이즈전환시 카메라 전환(시네마틱시퀀스) 

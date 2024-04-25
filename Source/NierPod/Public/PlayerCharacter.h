@@ -60,6 +60,8 @@ public:
 	class UAnimMontage* Dodge_montage;
 	UPROPERTY(EditAnywhere, Category = "MySettings|Inputs")
 	class UAnimMontage* OnDamaged_montage;
+	UPROPERTY(EditAnywhere, Category = "MySettings|Inputs")
+	class UAnimMontage* steashe_montage;
 
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	class APlayerDamageEffectActor* damageFX;
@@ -119,7 +121,7 @@ private:
 
 	FVector moveDirection;
 	FTimerHandle AttackTimer;
-	FTimerHandle IdleTimer;
+	FTimerHandle SteasheTimer;
 	
 
 	//임시로 보스 데미지주는 함수
@@ -152,6 +154,8 @@ private:
 	void PlayerDie();
 	UFUNCTION()
 	void EndAttack();
+	UFUNCTION()
+	void Steashe();
 
 
 	
