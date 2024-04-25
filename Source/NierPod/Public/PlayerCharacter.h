@@ -78,7 +78,7 @@ public:
 	void PlayerDamaged(int32 dmg);
 	//데미지 받으면서 튕겨지는 함수 
 	UFUNCTION()
-	void PlayerDamagedWithKnockBack(int32 dmg);
+	void PlayerDamagedWithKnockBack(int32 dmg, AActor* attacker);
 
 	UPROPERTY(EditAnywhere, Category = "PlayerSettings")
 	class UWidgetComponent* playerwidgetComp;

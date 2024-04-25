@@ -328,7 +328,7 @@ void ABossCharacter::MoveToTarget(float deltaSeconds)
 		
 		//Move 중 일정 시간이 지나면 방어상태로 변경
 		currentTime += deltaSeconds;
-		if(currentTime > 4.0f)
+		if(currentTime > 2.0f)
 		{	
 			currentTime = 0;
 			bossState = EBossState::BLOCK;

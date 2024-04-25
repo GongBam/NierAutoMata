@@ -393,14 +393,14 @@ void APlayerCharacter::PlayerDamaged(int32 dmg)
     }
 }
 //플레이어 데미지 입음 + 뒤로 튕겨지는 함수 
-void APlayerCharacter::PlayerDamagedWithKnockBack(int32 dmg)
+void APlayerCharacter::PlayerDamagedWithKnockBack(int32 dmg, AActor* attacker)
 {   
     //체력깎기 (체력 0~maxHP 범위로 설정)
     currentHP = FMath::Clamp(currentHP - dmg, 0, maxHP);
 
     FVector backVac = GetActorForwardVector() * -1.0f;
-    FVector targetLoc = GetActorLocation() + backVac * 5.0f;
-    FVector knockBackLocation = FMath::Lerp(GetActorLocation(), targetLoc, GetWorld()->GetDeltaSeconds() * 5);
+    FVector targetDir = (GetActorLocation() - attacker->GetActorLocation()) * -1;
+    FVector knockBackLocation = FMath::InterpEaseIn(GetActorLocation(), targetDir, GetWorld()->GetDeltaSeconds() * 2, 2.0f);
     SetActorLocation(knockBackLocation, true);
 
     PlayAnimMontage(OnDamaged_montage, 1.5f);

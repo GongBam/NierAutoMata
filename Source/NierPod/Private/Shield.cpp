@@ -58,7 +58,8 @@ void AShield::ShieldExtending()
 	//Lerp 이용해서 쉴드크기 확장시키기 
 	FVector originScale = meshComp->GetComponentScale();
 	FVector newScale = originScale * 2;
-	FVector lerpScale = FMath::Lerp(originScale, newScale, GetWorld()->GetDeltaSeconds() * 2);
+	//FVector lerpScale = FMath::Lerp(originScale, newScale, GetWorld()->GetDeltaSeconds() * 2);
+	FVector lerpScale = FMath::InterpEaseIn(originScale, newScale, GetWorld()->GetDeltaSeconds() * 2, 2.0f);
 
 	meshComp->SetRelativeScale3D(lerpScale);
 
@@ -80,7 +81,7 @@ void AShield::ShieldAttacking(class UPrimitiveComponent* OverlappedComp, class A
 	if (player != nullptr)
 	{
 
-		player->PlayerDamagedWithKnockBack(damage);
+		player->PlayerDamagedWithKnockBack(damage, this);
 	}
 }
 
