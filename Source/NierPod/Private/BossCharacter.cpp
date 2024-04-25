@@ -526,7 +526,7 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 				bossState = EBossState::IDLE;
 				bIsAttacked = false;
 			}
-			else if (currentHP < 4800 && bFirstPhase == false)
+			else if (currentHP <= 4800 && bFirstPhase == false)
 			{
 				currentTime = 0;
 				bossState = EBossState::PHASECHANGE;
@@ -535,6 +535,7 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 			else if (currentHP < 4800 && bFirstPhase == true)
 			{
 				//피격모션 후 플레이어 쫓아감
+				currentTime = 0;
 				bossState = EBossState::MOVE;
 				bIsAttacked = false;
 			}
@@ -571,6 +572,7 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 //페이즈 모션 
 void ABossCharacter::Phasing(float deltaSeconds)
 {		
+	bFirstPhase = true;
 	if (playerCharacter->currentHP <= 0)
 	{
 		bossState = EBossState::PLAYERKILL;

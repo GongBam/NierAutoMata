@@ -433,6 +433,7 @@ void APlayerCharacter::SwitchCameraToBoss()
    FTimerHandle cameraHandle;
    GetWorldTimerManager().SetTimer(cameraHandle, FTimerDelegate::CreateLambda([&]() {
        pc->SetViewTargetWithBlend(this, 1.0f);
+
        }), 0.5f, false);
 }
 
