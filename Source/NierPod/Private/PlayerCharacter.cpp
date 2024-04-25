@@ -400,13 +400,16 @@ void APlayerCharacter::PlayerDamagedWithKnockBack(int32 dmg)
 
     FVector backVac = GetActorForwardVector() * -1.0f;
     FVector targetLoc = GetActorLocation() + backVac * 5.0f;
-    FVector knockBackLocation = FMath::Lerp(GetActorLocation(), targetLoc, GetWorld()->GetDeltaSeconds() * 2);
+    FVector knockBackLocation = FMath::Lerp(GetActorLocation(), targetLoc, GetWorld()->GetDeltaSeconds() * 5);
     SetActorLocation(knockBackLocation, true);
+
+    PlayAnimMontage(OnDamaged_montage, 1.5f);
 
     if (playerUI != nullptr)
     {  //깎인 체력으로 체력바 UI 갱신 
         playerUI->SetHealthBar((float)currentHP / (float)maxHP);
     }
+
     //맞았을 때 체력이 0이거나 0보다 작아지면 
     if (currentHP <= 0)
     {   

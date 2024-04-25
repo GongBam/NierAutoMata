@@ -19,7 +19,7 @@ AShield::AShield()
 
 	sphereComp2 = CreateDefaultSubobject<USphereComponent>(TEXT("Attack Sphere Component"));
 	sphereComp2->SetupAttachment(RootComponent);
-	sphereComp2->SetRelativeScale3D(FVector(3));
+	sphereComp2->SetRelativeScale3D(FVector(4));
 	sphereComp2->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 
@@ -78,7 +78,8 @@ void AShield::ShieldAttacking(class UPrimitiveComponent* OverlappedComp, class A
 {	
 	player = Cast<APlayerCharacter>(OtherActor);
 	if (player != nullptr)
-	{	
+	{
+
 		player->PlayerDamagedWithKnockBack(damage);
 	}
 }
