@@ -117,7 +117,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 
     if(Loca==true)
     {
-        SetActorLocation(PlayerLocation);
+        //SetActorLocation(PlayerLocation);
     }
 }
 
@@ -399,10 +399,12 @@ void APlayerCharacter::PlayerDamagedWithKnockBack(int32 dmg, AActor* attacker)
     currentHP = FMath::Clamp(currentHP - dmg, 0, maxHP);
 
     FVector backVac = GetActorForwardVector() * -1.0f;
-    FVector targetDir = (GetActorLocation() - attacker->GetActorLocation()) * -1;
+    FVector targetDir = (GetActorLocation() - attacker->GetActorLocation()) * 100000;
     FVector knockBackLocation = FMath::InterpEaseIn(GetActorLocation(), targetDir, GetWorld()->GetDeltaSeconds() * 2, 2.0f);
+    UE_LOG(LogTemp, Warning, TEXT("before:%f,%f,%f"), GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
     SetActorLocation(knockBackLocation, true);
-
+    UE_LOG(LogTemp, Warning, TEXT("after:%f,%f,%f"),knockBackLocation.X,knockBackLocation.Y,knockBackLocation.Z);
+    UE_LOG(LogTemp, Warning, TEXT("before:%f,%f,%f"), GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z);
     PlayAnimMontage(OnDamaged_montage, 1.5f);
 
     if (playerUI != nullptr)
