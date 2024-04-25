@@ -532,7 +532,7 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 				bossState = EBossState::PHASECHANGE;
 				bIsAttacked = false;
 			}
-			else if (currentHP < 4800 && bFirstPhase == true)
+			else if (currentHP < 4800 && currentHP > 4000 && bFirstPhase == true)
 			{
 				//피격모션 후 플레이어 쫓아감
 				currentTime = 0;
@@ -541,7 +541,7 @@ void ABossCharacter::DamageProcess(float deltaSeconds)
 			}
 			//슈팅페이즈 진입 
 			else if (currentHP <= 4000 && bFirstShooting == false)
-			{
+			{	
 				currentTime = 0;
 				bPhaseChanged = true;
 				bIsAttacked = false;
