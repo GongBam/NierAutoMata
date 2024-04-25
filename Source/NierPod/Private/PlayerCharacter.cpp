@@ -117,7 +117,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 
     if(Loca==true)
     {
-        //SetActorLocation(PlayerLocation);
+       SetActorLocation(PlayerLocation);
     }
 }
 
