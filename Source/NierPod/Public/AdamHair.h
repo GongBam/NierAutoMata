@@ -22,7 +22,4 @@ public:
 	UPROPERTY(EditAnywhere, Category = "BossSettings")
 	class UStaticMeshComponent* meshComp;
 
-	UPROPERTY()
-	ABossCharacter* boss;
-
 };
